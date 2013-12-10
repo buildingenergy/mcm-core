@@ -9,7 +9,30 @@ NB: This is spike code so far.
 
 """
 
-class MCMParser(object):
+BEDES_CSV = '../data/BEDES/V8.4/BEDES_Datamodel-08-20-13.csv'
+
+class CSVParser(object):
+    def __init__(self, csvfile, *args, **kwargs):
+        self.csvfile = csvfile
+        self.csvreader = self._get_csv_reader(csvfile)
+
+    def _get_csv_reader(self, *args, **kwargs):
+        """Guess CSV dialect, and return CSV reader."""
+        dialect = csv.Sniffer().sniff(self.csvfile.read(1024))
+        self.csvfile.seek(0)
+
+        if not 'reader_type' in kwargs:
+            return csv.reader(self.csvfile, dialect)
+
+        else:
+            return kwargs.get('reader_type')(self.csvfile, dialect)
+
+
+class CSV2Json(CSVParser):
+
+    pass
+
+class MCMParser(CSVParser):
     """
     This Parser is a wrapper around CSVReader which matches columnar data
     against a set of known ontologies and separates data according
@@ -20,14 +43,16 @@ class MCMParser(object):
     Merge:
 
     """
-    def __init__(self, csvfile, ontologies, matching_func=None):
-        self.csvfile = csvfile
+    def __init__(self, csvfile, ontologies, *args, **kwargs):
+        super(MCMParser, self).__init__(csvfile, args, kwargs)
         self.ontologies = self._prepare_column_ontologies(ontologies)
-        self.csvreader = self._get_csv_reader()
-        if not matching_func:
+        if not 'matching_func' in kwargs:
             # Special note, contains expects argumengs like the following
             # contains(a, b); tests outcome of ``b in a``
             self.matching_func = operator.contains
+
+        else:
+            self.matching_func = kwargs.get('matching_func')
 
     def _prepare_column_ontologies(self, ontologies):
         """Strip, and lowercase each of the column name definitions."""
@@ -36,13 +61,6 @@ class MCMParser(object):
                 item = item.strip().lower()
 
         return ontologies
-
-    def _get_csv_reader(self):
-        """Guess CSV dialect, and return CSV reader."""
-        dialect = csv.Sniffer().sniff(self.csvfile.read(1024))
-        self.csvfile.seek(0)
-
-        return csv.reader(self.csvfile, dialect)
 
     def get_columns(self):
         """Return just the column names."""
@@ -106,6 +124,10 @@ def main():
     print parser.group_columns_by_ontology(columns_raw)
 
 
+    bedes_f = open(BEDES_CSV, 'rb')
+    converter = CSV2Json(bedes_f, reader_type=csv.DictReader)
+
+    import ipdb; ipdb.set_trace()
 
 if __name__ == '__main__':
     main()
