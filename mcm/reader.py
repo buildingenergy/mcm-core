@@ -1,27 +1,48 @@
 import csv
 import operator
 
+""" The Reader module is intended to contain only code which reads data
+out of CSV files. Fuzzy matches, application to data models happens
+elsewhere.
+
+NB: This is spike code so far.
+
+"""
+
 class MCMParser(object):
     """
     This Parser is a wrapper around CSVReader which matches columnar data
     against a set of known ontologies and separates data according
     to those distinctions.
 
+    Map: mapping the columns to known ontologies, then colating data by these.
+    Clean: coerce data according to ontology schema.
+    Merge:
+
     """
     def __init__(self, csvfile, ontologies, matching_func=None):
         self.csvfile = csvfile
-        self.ontologies = ontologies
-        self._get_csv_reader()
+        self.ontologies = self._prepare_column_ontologies(ontologies)
+        self.csvreader = self._get_csv_reader()
         if not matching_func:
             # Special note, contains expects argumengs like the following
             # contains(a, b); tests outcome of ``b in a``
             self.matching_func = operator.contains
 
+    def _prepare_column_ontologies(self, ontologies):
+        """Strip, and lowercase each of the column name definitions."""
+        for ontology in ontologies:
+            for item in ontologies[ontology]:
+                item = item.strip().lower()
+
+        return ontologies
+
     def _get_csv_reader(self):
         """Guess CSV dialect, and return CSV reader."""
         dialect = csv.Sniffer().sniff(self.csvfile.read(1024))
         self.csvfile.seek(0)
-        self.csvreader = csv.reader(self.csvfile, dialect)
+
+        return csv.reader(self.csvfile, dialect)
 
     def get_columns(self):
         """Return just the column names."""
@@ -41,7 +62,12 @@ class MCMParser(object):
         return matching, not_matching
 
     def _get_common_unmatched(self, unmatched):
-        """Here unmatched are dicts of lists."""
+        """Returns a set of all common unmatched items.
+
+        :param unmatched: dictionary of lists, keys ontologies, values lists.
+        :returns: set of names which belong to no ontology.
+
+        """
         return set(unmatched.values()[0]).intersection(*unmatched.values())
 
 
@@ -62,7 +88,7 @@ class MCMParser(object):
 
 
 def main():
-    """Just some test code."""
+    """Just some contrived test code."""
     # Test ontology column names
     fake_ontology = ('Name', 'Date', 'Location',)
     other_ontology = ('Name', 'Status',)
@@ -78,6 +104,7 @@ def main():
     print 'Matched: {0}, and unmatched {1}'.format(columns[0], columns[1])
 
     print parser.group_columns_by_ontology(columns_raw)
+
 
 
 if __name__ == '__main__':
