@@ -9,12 +9,12 @@ NB: This is spike code so far.
 
 """
 
-BEDES_CSV = '../data/BEDES/V8.4/BEDES_Datamodel-08-20-13.csv'
 
 class CSVParser(object):
     def __init__(self, csvfile, *args, **kwargs):
         self.csvfile = csvfile
-        self.csvreader = self._get_csv_reader(csvfile)
+        self.csvreader = self._get_csv_reader(csvfile, **kwargs)
+        self.fieldnames = self.get_columns()
 
     def _get_csv_reader(self, *args, **kwargs):
         """Guess CSV dialect, and return CSV reader."""
@@ -22,15 +22,22 @@ class CSVParser(object):
         self.csvfile.seek(0)
 
         if not 'reader_type' in kwargs:
-            return csv.reader(self.csvfile, dialect)
+            return csv.reader(self.csvfile, dialect, **kwargs)
 
         else:
-            return kwargs.get('reader_type')(self.csvfile, dialect)
+            reader_type = kwargs.get('reader_type')
+            del kwargs['reader_type']
+            return reader_type(self.csvfile, dialect, **kwargs)
+
+    def get_columns(self):
+        """Return just the column names."""
+        self.csvfile.seek(0)
+        return self.csvreader.next()
+
+    def next_as_dict(self):
+        return dict(zip(self.fieldnames, self.csvreader.next()))
 
 
-class CSV2Json(CSVParser):
-
-    pass
 
 class MCMParser(CSVParser):
     """
@@ -107,7 +114,10 @@ class MCMParser(CSVParser):
 
 def main():
     """Just some contrived test code."""
-    # Test ontology column names
+    #
+    ## Test ontology column names
+    ###
+
     fake_ontology = ('Name', 'Date', 'Location',)
     other_ontology = ('Name', 'Status',)
     ontologies = {'fake': fake_ontology, 'other': other_ontology,}
@@ -123,11 +133,6 @@ def main():
 
     print parser.group_columns_by_ontology(columns_raw)
 
-
-    bedes_f = open(BEDES_CSV, 'rb')
-    converter = CSV2Json(bedes_f, reader_type=csv.DictReader)
-
-    import ipdb; ipdb.set_trace()
 
 if __name__ == '__main__':
     main()
