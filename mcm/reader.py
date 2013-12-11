@@ -122,7 +122,7 @@ def main():
     other_ontology = ('Name', 'Status',)
     ontologies = {'fake': fake_ontology, 'other': other_ontology,}
 
-    f = open('database.csv', 'rb')
+    f = open('../data/test/database.csv', 'rb')
     parser = MCMParser(f, ontologies)
 
     columns_raw = parser.get_columns()
