@@ -1,6 +1,8 @@
 from pprint import pprint
 from reader import CSVParser
 
+from val import Optional
+
 BEDES_CSV = '../data/BEDES/V8.4/BEDES_Datamodel-08-20-13.csv'
 
 class CSV2Json(CSVParser):
@@ -17,16 +19,22 @@ class CSV2Json(CSVParser):
         return [item for item in attr_data.split(';') if item]
 
     def _parse_data_type(self, attr_data):
+        """Convert to python types for validation."""
         if attr_data == 'boolean':
             return bool
         elif attr_data == 'ENUM':
             return 'enum'
         elif attr_data == 'double':
-            return 0.0
+            return float
         elif attr_data == 'interger':
-            return 0
+            return int
 
     def _parse_attribute_data(self, row):
+        """Get the parameters for each attribute described by the row.
+
+        Each row here is expected to define an attribute within a table.
+
+        """
         results = {}
         for item in row:
             attribute_handler = getattr(
@@ -42,25 +50,9 @@ class CSV2Json(CSVParser):
 
         return results
 
-    def _parse_row_data(self, table_name, table):
-        """NB: presupposes entity or attribute def on a line."""
-        self.sanitize_fieldnames()
-        row = self.next_as_dict()
-        entity = row.get('entity_name')
-        attribute = row.get('attribute_name')
-        if entity:
-            if not table_name:
-                table_name = entity
-            if table:
-                self.json['schema']['tables'][table_name] = table
-            table_name = entity
-            table = []
-
-        if attribute:
-            table.append(self._parse_attribute_data(row))
-
     def convert_to_json(self, ontology_name):
         """Does the business logic of translating our CSV to JSON."""
+        self.sanitize_fieldnames()
         self.json = {
             'ontology_name': ontology_name,
             'schema': {
@@ -72,13 +64,27 @@ class CSV2Json(CSVParser):
 
         while 1:
             try:
-                self._parse_row_data(table_name, table)
+                row = self.next_as_dict()
+                entity = row.get('entity_name')
+                attribute = row.get('attribute_name')
+                if entity:
+                    if not table_name:
+                        # This is the first run, we haven't been processing yet
+                        table_name = entity
+                    if table:
+                        self.json['schema']['tables'][table_name] = table
+                    # Reset our temp vars because we're storing a new table.
+                    table_name = entity
+                    table = []
+
+                if attribute:
+                    table.append(self._parse_attribute_data(row))
+
             except StopIteration:
                 break
 
         # To capture the last table we parse.
         self.json['schema']['tables'][table_name] = table
-
 
 def main():
 
@@ -91,6 +97,7 @@ def main():
 
     converter.convert_to_json('bedes')
     pprint(converter.json)
+    import ipdb; ipdb.set_trace()
 
 
 if __name__ == '__main__':
