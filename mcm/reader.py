@@ -47,7 +47,7 @@ class MCMParser(CSVParser):
 
     Map: mapping the columns to known ontologies, then colating data by these.
     Clean: coerce data according to ontology schema.
-    Merge:
+    Merge: merging the data from multiple sources into one ontology.
 
     """
     def __init__(self, csvfile, ontologies, *args, **kwargs):
@@ -62,7 +62,12 @@ class MCMParser(CSVParser):
             self.matching_func = kwargs.get('matching_func')
 
     def _prepare_column_ontologies(self, ontologies):
-        """Strip, and lowercase each of the column name definitions."""
+        """Strip, and lowercase each of the column name definitions.
+
+        :param ontologies: dict of iterables containing strings, the names.
+        :returns: dict, cleaned up version of column names.
+
+        """
         for ontology in ontologies:
             for item in ontologies[ontology]:
                 item = item.strip().lower()
@@ -75,7 +80,14 @@ class MCMParser(CSVParser):
         return self.csvreader.next()
 
     def match_columns(self, raw_columns, ontology):
-        """Return matched and unmatched columns."""
+        """Return matched and unmatched columns.
+
+        :param raw_columns: iterable of str, the read names.
+        :ontology: iterable of str, the column names we match against.
+        :returns: tuple of iterables, matching the ones that match this
+        ontology, not_matching, the rest of the column names.
+
+        """
         matching = []
         not_matching = []
         for name in raw_columns:
@@ -97,7 +109,14 @@ class MCMParser(CSVParser):
 
 
     def group_columns_by_ontology(self, raw_columns):
-        """Get all of the columns based on the ontology they belong to."""
+        """Get all of the columns based on the ontology they belong to.
+
+        :param raw_columns: iterable of str, the read values from a file.
+        :returns: matched_result, a dict keyed by ontology name whose values
+        are the matched column names, common_unmatched are all the columns
+        that weren't matched into any ontology.
+
+        """
         matched_result = {}
         unmatched_result = {}
         for ontology in self.ontologies:
