@@ -1,3 +1,5 @@
+import json
+
 from pprint import pprint
 from reader import CSVParser
 
@@ -100,7 +102,8 @@ def main():
     converter = CSV2Json(bedes_f, 'bedes')
 
     converter.convert_to_json()
-    pprint(converter.json)
+
+    print(json.dumps(converter.json))
 
 if __name__ == '__main__':
     main()
