@@ -6,6 +6,22 @@ from val import And, Convert, Optional, Or, Schema
 #BEDES_CSV = '../data/BEDES/V8.4/BEDES_Datamodel-08-20-13.csv'
 BEDES_CSV = '../data/BEDES/V8.4/BEDES_REWORKED.csv'
 
+def validate_float(x):
+    return float(x)
+
+def validate_enum(x, choices):
+    return x in choices
+
+def validate_boolean(x):
+    """Example basic boolean validation."""
+    if isinstance(x, bool):
+        return x
+
+    if x.strip().lower() == 'true' or int(x) == 1:
+        return True
+    else:
+        return False
+
 class CSV2Json(CSVParser):
 
     def __init__(self, csvfile, ontology_name):
@@ -28,34 +44,6 @@ class CSV2Json(CSVParser):
     def _parse_enum_entries(self, attr_data):
         return [item for item in attr_data.split(';') if item]
 
-    def _parse_data_type(self, attr_data, **kwargs):
-        """Convert to validators for given data_type."""
-        attr_data = attr_data.strip().lower()
-        if attr_data == 'boolean':
-            return Or(bool, Convert(lambda x: bool(x)))
-        elif attr_data == 'enum':
-            return And(
-                basestring, lambda x: x in kwargs.get('enum_entries', [])
-            )
-        elif attr_data == 'double':
-            return Or(float, basestring, Convert(lambda x: float(x)))
-        elif attr_data == 'interger':
-            return Or(int, basestring, Convert(lambda x: int(x)))
-
-        return basestring
-
-    def _parse_validation(self, row):
-        """Get the parameters for each attribute described by the row.
-
-        Each row here is expected to define an attribute within a table.
-
-        """
-        enum_entries = self._parse_enum_entries(row.get('enum_entries'))
-
-        return self._parse_data_type(
-            row.get('data_type'), enum_entries=enum_entries
-        )
-
     def convert_to_json(self):
         """Does the business logic of translating our CSV to JSON."""
         self.sanitize_fieldnames()
@@ -66,9 +54,9 @@ class CSV2Json(CSVParser):
             try:
                 row = self.next_as_dict()
                 entity = row.get('entity_name')
-                attribute = row.get(
+                attr = row.get(
                     'attribute_name'
-                ).strip().lower().replace(' ', '_')
+                )
                 if entity:
                     if not table_name:
                         # This is the first run, we haven't been processing yet
@@ -79,14 +67,19 @@ class CSV2Json(CSVParser):
                     table_name = entity
                     table = {}
 
-                if attribute:
-                    table[attribute] = {
-                        'parameters':  self._parse_validation(row),
-                        Optional('description'): row.get(
-                            'description_and_unit'
-                        ),
-                        Optional('priority'): int,
+                if attr:
+                    attr = attr.strip().lower().replace(' ', '_')
+                    table[attr] = {
+                        'type': row.get('data_type'),
+                        'description': row.get('description_and_unit'),
+                        'priority': row.get('priority'),
                     }
+
+                    entries = row.get('enum_entries')
+                    if entries:
+                        table[attr]['enum_entries'] = self._parse_enum_entries(
+                            entries
+                        )
 
             except StopIteration:
                 break
@@ -108,7 +101,6 @@ def main():
 
     converter.convert_to_json()
     pprint(converter.json)
-
 
 if __name__ == '__main__':
     main()
