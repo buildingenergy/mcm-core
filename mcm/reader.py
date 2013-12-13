@@ -38,7 +38,6 @@ class CSVParser(object):
         return dict(zip(self.fieldnames, self.csvreader.next()))
 
 
-
 class MCMParser(CSVParser):
     """
     This Parser is a wrapper around CSVReader which matches columnar data

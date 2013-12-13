@@ -70,16 +70,17 @@ class CSV2Json(CSVParser):
                     table = {}
 
                 if attr:
-                    attr = attr.strip().lower().replace(' ', '_')
-                    table[attr] = {
+                    attr_new = attr.strip().lower().replace(' ', '_')
+                    table[attr_new] = {
                         'type': row.get('data_type'),
                         'description': row.get('description_and_unit'),
                         'priority': row.get('priority'),
+                        'human_readable': attr,
                     }
 
                     entries = row.get('enum_entries')
                     if entries:
-                        table[attr]['enum_entries'] = self._parse_enum_entries(
+                        table[attr_new]['enum_entries'] = self._parse_enum_entries(
                             entries
                         )
 
