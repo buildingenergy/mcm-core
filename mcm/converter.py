@@ -1,12 +1,14 @@
 import json
-
 from pprint import pprint
+import sys
+
 from reader import CSVParser
 
 from val import And, Convert, Optional, Or, Schema
 
 #BEDES_CSV = '../data/BEDES/V8.4/BEDES_Datamodel-08-20-13.csv'
 BEDES_CSV = '../data/BEDES/V8.4/BEDES_REWORKED.csv'
+ESPM_CSV = '../data/ESPM/ESPM_all_fields.csv'
 
 def validate_float(x):
     return float(x)
@@ -24,27 +26,45 @@ def validate_boolean(x):
     else:
         return False
 
-class CSV2Json(CSVParser):
+class EspmCsv2Json(CSVParser):
+    def __init__(self, csvfile, ontology_name):
+        super(EspmCsv2Json, self).__init__(csvfile)
+        # Note here that we don't have tables.
+        self.json = {
+            'ontology_name': ontology_name,
+            'flat_schema': {}
+        }
+
+    def convert_to_json(self):
+        self.sanitize_fieldnames()
+        self.flat_schema = {}
+        while 1:
+            try:
+                row = self.next_as_dict()
+                attr = row.get('field_name')
+                units = row.get('units')
+                self.json['flat_schema'][attr] = units
+
+            except StopIteration:
+                break
+
+        return self.json
+
+
+class BedesCsv2Json(CSVParser):
 
     def __init__(self, csvfile, ontology_name):
-        super(CSV2Json, self).__init__(csvfile)
+        super(BedesCsv2Json, self).__init__(csvfile)
         self.json = {
             'ontology_name': ontology_name,
             'schema': {
                 'tables': {}
-            }
+            },
+            'flat_schema': []
         }
 
-    def sanitize_fieldnames(self):
-        new_fields = []
-        for name in self.fieldnames:
-            new_fields.append(
-                name.strip().lower().replace(' ', '_')
-            )
-        self.fieldnames = new_fields
-
     def _parse_enum_entries(self, attr_data):
-        return [item for item in attr_data.split(';') if item]
+        return [item.strip() for item in attr_data.split(';') if item]
 
     def convert_to_json(self):
         """Does the business logic of translating our CSV to JSON."""
@@ -78,6 +98,13 @@ class CSV2Json(CSVParser):
                         'human_readable': attr,
                     }
 
+                    # Create a flat schema, too for easier comparison
+                    # to other ontologies
+
+                    self.json['flat_schema'].append(
+                            '{0}:{1}'.format(table_name, attr)
+                    )
+
                     entries = row.get('enum_entries')
                     if entries:
                         table[attr_new]['enum_entries'] = self._parse_enum_entries(
@@ -90,7 +117,7 @@ class CSV2Json(CSVParser):
         # To capture the last table we parse.
         self.json['schema']['tables'][table_name] = table
 
-        return Schema(self.json)
+        return self.json
 
 
 def main():
@@ -99,8 +126,12 @@ def main():
     ## Converter Testing
     ###
 
-    bedes_f = open(BEDES_CSV, 'rb')
-    converter = CSV2Json(bedes_f, 'bedes')
+    if 'bedes' in sys.argv:
+        csv_f = open(BEDES_CSV, 'rb')
+        converter = BedesCsv2Json(csv_f, 'bedes')
+    else:
+        csv_f = open(ESPM_CSV, 'rb')
+        converter = EspmCsv2Json(csv_f, 'espm')
 
     converter.convert_to_json()
 

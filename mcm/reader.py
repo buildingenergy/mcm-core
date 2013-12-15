@@ -1,4 +1,6 @@
+
 import csv
+import json
 import operator
 
 """ The Reader module is intended to contain only code which reads data
@@ -8,6 +10,11 @@ elsewhere.
 NB: This is spike code so far.
 
 """
+
+def load_ontology(filename):
+    """Load json structure from a file."""
+    with open(filename, 'rb') as f:
+        return json.loads(f.read())
 
 
 class CSVParser(object):
@@ -33,6 +40,14 @@ class CSVParser(object):
         """Return just the column names."""
         self.csvfile.seek(0)
         return self.csvreader.next()
+
+    def sanitize_fieldnames(self):
+        new_fields = []
+        for name in self.fieldnames:
+            new_fields.append(
+                name.strip().lower().replace(' ', '_')
+            )
+        self.fieldnames = new_fields
 
     def next_as_dict(self):
         return dict(zip(self.fieldnames, self.csvreader.next()))
@@ -73,20 +88,20 @@ class MCMParser(CSVParser):
 
         return ontologies
 
-    def get_columns(self):
+    def _get_columns(self):
         """Return just the column names."""
         self.csvfile.seek(0)
         return self.csvreader.next()
 
-    def match_columns(self, raw_columns, ontology):
+    def get_mapped_columns(self, ontology):
         """Return matched and unmatched columns.
 
-        :param raw_columns: iterable of str, the read names.
         :ontology: iterable of str, the column names we match against.
         :returns: tuple of iterables, matching the ones that match this
         ontology, not_matching, the rest of the column names.
 
         """
+        raw_columns = self._get_columns()
         matching = []
         not_matching = []
         for name in raw_columns:
@@ -129,6 +144,19 @@ class MCMParser(CSVParser):
 
         return matched_result, common_unmatched
 
+    def get_clean_row_data(self, ontology_columns):
+        """Runs validationa gainst each row, separately returns extra data."""
+
+        # If table-specific, like BEDES, figure out which table we're looking at
+
+        # Now look at the columns in the user-data, see if they match our schema
+
+        # Put their data in the appropriate dictionary
+
+        # Save the extra data in a separate dictionary
+
+        pass
+
 
 def main():
     """Just some contrived test code."""
@@ -150,7 +178,19 @@ def main():
     print 'Matched: {0}, and unmatched {1}'.format(columns[0], columns[1])
 
     print parser.group_columns_by_ontology(columns_raw)
+    f.close()
 
+    # This section is all aspriational
+    # This is what the client would actually look like.
+
+    #ontologies['bedes'] = load_ontology('../data/BEDES/bedes.json')
+
+    #with open('../data/test/sample_pm.csv', 'rb') as f:
+        #ontology = ontologies['bedes'] 
+        #parser = MCMParser(f, [ontology]) # is designed to handle multiple
+        #mapped, unmapped = parser.get_mapped_columns()
+        # Will need to relate this by which building.
+        #cleaned, extra = parser.get_clean_row_data(mapped, ontology)
 
 if __name__ == '__main__':
     main()
