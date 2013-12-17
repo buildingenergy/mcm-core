@@ -7,7 +7,7 @@
 
 # Now, how do deal with multiple enum values that go into the same column?
 #   Need to go into multiple rows for BEDES.
-ESPM_TO_BEDES = {
+ONTOLOGY = {
         'Address 1': [
             'Site: Address Field 1',
             'CommercialFacility: Address Field 1',
@@ -70,9 +70,7 @@ ESPM_TO_BEDES = {
         'ENERGY STAR Score': 'EnergyUse: Energy Use Metric Type: Portfolio Manager Energy Performance Rating',
         
         "Property's Portfolio Manager Account Holder": None, # TODO: could be owner, opperator, who knows.
-        'Electric Distribution Utility': 'EnergyUse: Utility', 'ITSystem: Density',
- 
-            
+        'Electric Distribution Utility': 'EnergyUse: Utility',
  }
 
 
