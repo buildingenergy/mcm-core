@@ -1,7 +1,9 @@
-
 import csv
 import json
+from pprint import pprint
 import operator
+
+from colorama import init, Fore
 
 """ The Reader module is intended to contain only code which reads data
 out of CSV files. Fuzzy matches, application to data models happens
@@ -66,7 +68,7 @@ class MCMParser(CSVParser):
     """
     def __init__(self, csvfile, ontologies, *args, **kwargs):
         super(MCMParser, self).__init__(csvfile, args, kwargs)
-        self.ontologies = self._prepare_column_ontologies(ontologies)
+        #self.ontologies = self._prepare_column_ontologies(ontologies)
         if not 'matching_func' in kwargs:
             # Special note, contains expects argumengs like the following
             # contains(a, b); tests outcome of ``b in a``
@@ -144,18 +146,14 @@ class MCMParser(CSVParser):
 
         return matched_result, common_unmatched
 
-    def get_clean_row_data(self, ontology_columns):
+    def get_clean_row_data(self, ontology_columns, ontology):
         """Runs validationa gainst each row, separately returns extra data."""
-
         # If table-specific, like BEDES, figure out which table we're looking at
-
         # Now look at the columns in the user-data, see if they match our schema
-
         # Put their data in the appropriate dictionary
-
         # Save the extra data in a separate dictionary
 
-        pass
+        return None, None
 
 
 def main():
@@ -163,34 +161,32 @@ def main():
     #
     ## Test ontology column names
     ###
+    init()
+    from ontologies import espm
+    with open('../data/test/sample_pm.csv', 'rb') as f:
+        ontology = espm.ONTOLOGY
+        parser = MCMParser(f, [ontology]) # is designed to handle multiple
+        mapped, unmapped = parser.get_mapped_columns(ontology)
 
-    fake_ontology = ('Name', 'Date', 'Location',)
-    other_ontology = ('Name', 'Status',)
-    ontologies = {'fake': fake_ontology, 'other': other_ontology,}
+        if not mapped and not unmapped:
+            print Fore.RED + 'no mappings found :('
+            return
 
-    f = open('../data/test/database.csv', 'rb')
-    parser = MCMParser(f, ontologies)
+        num_items = len(mapped) + len(unmapped)
+        print Fore.GREEN + (
+            '\n\n{0:.2f} percent mapped to our ontology,'
+            ' with {1} items.\n\n').format(
+            len(mapped)/float(num_items) * 100,
+            len(mapped)
+        )
 
-    columns_raw = parser.get_columns()
-    print 'Raw: {0}'.format(columns_raw)
-
-    columns = parser.match_columns(columns_raw, fake_ontology)
-    print 'Matched: {0}, and unmatched {1}'.format(columns[0], columns[1])
-
-    print parser.group_columns_by_ontology(columns_raw)
-    f.close()
-
-    # This section is all aspriational
-    # This is what the client would actually look like.
-
-    #ontologies['bedes'] = load_ontology('../data/BEDES/bedes.json')
-
-    #with open('../data/test/sample_pm.csv', 'rb') as f:
-        #ontology = ontologies['bedes'] 
-        #parser = MCMParser(f, [ontology]) # is designed to handle multiple
-        #mapped, unmapped = parser.get_mapped_columns()
-        # Will need to relate this by which building.
-        #cleaned, extra = parser.get_clean_row_data(mapped, ontology)
+        print Fore.YELLOW + '\nMatching columns:'
+        pprint(mapped)
+        print Fore.MAGENTA + '\nUnmatched columns:'
+        pprint(unmapped)
+        #Will need to relate this by which building.
+        cleaned, extra = parser.get_clean_row_data(mapped, ontology)
+        # Save data, etc.
 
 if __name__ == '__main__':
     main()

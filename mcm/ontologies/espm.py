@@ -74,13 +74,26 @@ ONTOLOGY = {
  }
 
 
+common_building_types = [
+    'Bank Branch',
+    'Courthouse',
+    'Hotel',
+    'K-12 School',
+    'Medical Office',
+    'Office',
+    'Retail Store',
+    'Senior Care Community',
+    'Supermarket/Grocery',
+    'Non-Refrigerated Warehouse',
+]
+
 # There are some retitive fields whose values only change slightly.
-for name in ['Bank Branch', 'Courthouse', 'Hotel', 'K-12 School', 'Medical Office']:
-    ESPM_TO_BEDES['{0} - Computer Density (Number per 1,000 ft\\xef\\xbe\\xb2)'.format(name)] =  'ITSystem:Density'
-    ESPM_TO_BEDES['{0} - Gross Floor Area (ft\\xef\\xbe\\xb2)'.format(name)] = 'ITSystem: Density'
-    ESPM_TO_BEDES['{0} - Number of Computers'.format(name)] = 'ITSystem: Quantity',
-    ESPM_TO_BEDES['{0} - Number of Workers on Main Shift'.format(name)] = 'CommercialFacility: Number Of Occupants',
-    ESPM_TO_BEDES['{0} - Percent That Can Be Cooled'.format(name)] = 'Cooling: Percent Of Floor Area Served'
-    ESPM_TO_BEDES['{0} - Percent That Can Be Heated'.format(name)] = 'Heating: Percent Of Floor Area Served'
-    ESPM_TO_BEDES['{0} - Weekly Operating Hours'.format(name)] = 'ActivityArea: Average Weekly Operating Hours',
-    ESPM_TO_BEDES['{0} - Worker Density'.format(name)] = None
+for name in common_building_types:
+    ONTOLOGY['{0} - Computer Density (Number per 1,000 ft\\xef\\xbe\\xb2)'.format(name)] =  'ITSystem:Density'
+    ONTOLOGY['{0} - Gross Floor Area (ft\\xef\\xbe\\xb2)'.format(name)] = 'ITSystem: Density'
+    ONTOLOGY['{0} - Number of Computers'.format(name)] = 'ITSystem: Quantity',
+    ONTOLOGY['{0} - Number of Workers on Main Shift'.format(name)] = 'CommercialFacility: Number Of Occupants',
+    ONTOLOGY['{0} - Percent That Can Be Cooled'.format(name)] = 'Cooling: Percent Of Floor Area Served'
+    ONTOLOGY['{0} - Percent That Can Be Heated'.format(name)] = 'Heating: Percent Of Floor Area Served'
+    ONTOLOGY['{0} - Weekly Operating Hours'.format(name)] = 'ActivityArea: Average Weekly Operating Hours',
+    ONTOLOGY['{0} - Worker Density'.format(name)] = None
