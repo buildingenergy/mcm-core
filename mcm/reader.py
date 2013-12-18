@@ -5,6 +5,9 @@ import operator
 
 from colorama import init, Fore
 
+import matchers
+import validators
+
 """ The Reader module is intended to contain only code which reads data
 out of CSV files. Fuzzy matches, application to data models happens
 elsewhere.
@@ -98,7 +101,7 @@ class MCMParser(CSVParser):
     def get_mapped_columns(self, ontology):
         """Return matched and unmatched columns.
 
-        :ontology: iterable of str, the column names we match against.
+        :param ontology: iterable of str, the column names we match against.
         :returns: tuple of iterables, matching the ones that match this
         ontology, not_matching, the rest of the column names.
 
@@ -107,7 +110,7 @@ class MCMParser(CSVParser):
         matching = []
         not_matching = []
         for name in raw_columns:
-            if self.matching_func(ontology, name):
+            if self.matching_func(ontology['fields'], name):
                 matching.append(name)
             else:
                 not_matching.append(name)
@@ -146,14 +149,40 @@ class MCMParser(CSVParser):
 
         return matched_result, common_unmatched
 
-    def get_clean_row_data(self, ontology_columns, ontology):
-        """Runs validationa gainst each row, separately returns extra data."""
+    def get_validator(self, column, ontology):
+        """return a function that validates/coerces a given field."""
+        if column in ontology['types']:
+            data_type, units = ontology['types'][column]
+            return getattr(validators, '{0}_validator'.format(data_type))
+        return validators.default_validator
+
+    def get_clean_row_data(self, matched_columns, ontology):
+        """Runs validation gainst each row, separately returns extra data."""
         # If table-specific, like BEDES, figure out which table we're looking at
         # Now look at the columns in the user-data, see if they match our schema
         # Put their data in the appropriate dictionary
         # Save the extra data in a separate dictionary
 
-        return None, None
+        matched_rows = []
+        unmatched_rows = []
+        while 1:
+            r = []
+            try:
+                row = self.next_as_dict()
+            except StopIteration:
+                break
+
+            for column in matched_columns:
+                if column in row:
+                    r.append(row[column])
+                    #r.append(self.get_validator(column, ontology)(
+                    #    ontology['types'].get(column)
+                    #))
+
+            matched_rows.append(r)
+
+        # Don't actually produce any unmapped data yet.
+        return matched_rows, None
 
 
 def main():
@@ -161,14 +190,18 @@ def main():
     #
     ## Test ontology column names
     ###
-    init()
+    init() # for colors.
     from ontologies import espm
-    with open('../data/test/sample_pm.csv', 'rb') as f:
+    with open('../data/test/sample.csv', 'rb') as f:
         ontology = espm.ONTOLOGY
-        parser = MCMParser(f, [ontology]) # is designed to handle multiple
+        parser = MCMParser(
+            f,
+            [ontology],  # is designed to handle multiple
+            matching_func=matchers.fuzzy_in_set
+        )
         mapped, unmapped = parser.get_mapped_columns(ontology)
 
-        if not mapped and not unmapped:
+        if not mapped:
             print Fore.RED + 'no mappings found :('
             return
 
@@ -184,9 +217,12 @@ def main():
         pprint(mapped)
         print Fore.MAGENTA + '\nUnmatched columns:'
         pprint(unmapped)
-        #Will need to relate this by which building.
+        print(Fore.RESET)
         cleaned, extra = parser.get_clean_row_data(mapped, ontology)
+        #Will need to relate this by which building.
         # Save data, etc.
+
+        import ipdb; ipdb.set_trace()
 
 if __name__ == '__main__':
     main()

@@ -7,7 +7,11 @@
 
 # Now, how do deal with multiple enum values that go into the same column?
 #   Need to go into multiple rows for BEDES.
+fields = 'fields'
+types = 'types'
+
 ONTOLOGY = {
+    fields: {
         'Address 1': [
             'Site: Address Field 1',
             'CommercialFacility: Address Field 1',
@@ -71,8 +75,8 @@ ONTOLOGY = {
         
         "Property's Portfolio Manager Account Holder": None, # TODO: could be owner, opperator, who knows.
         'Electric Distribution Utility': 'EnergyUse: Utility',
+    }
  }
-
 
 common_building_types = [
     'Bank Branch',
@@ -89,11 +93,24 @@ common_building_types = [
 
 # There are some retitive fields whose values only change slightly.
 for name in common_building_types:
-    ONTOLOGY['{0} - Computer Density (Number per 1,000 ft\\xef\\xbe\\xb2)'.format(name)] =  'ITSystem:Density'
-    ONTOLOGY['{0} - Gross Floor Area (ft\\xef\\xbe\\xb2)'.format(name)] = 'ITSystem: Density'
-    ONTOLOGY['{0} - Number of Computers'.format(name)] = 'ITSystem: Quantity',
-    ONTOLOGY['{0} - Number of Workers on Main Shift'.format(name)] = 'CommercialFacility: Number Of Occupants',
-    ONTOLOGY['{0} - Percent That Can Be Cooled'.format(name)] = 'Cooling: Percent Of Floor Area Served'
-    ONTOLOGY['{0} - Percent That Can Be Heated'.format(name)] = 'Heating: Percent Of Floor Area Served'
-    ONTOLOGY['{0} - Weekly Operating Hours'.format(name)] = 'ActivityArea: Average Weekly Operating Hours',
-    ONTOLOGY['{0} - Worker Density'.format(name)] = None
+    ONTOLOGY[fields]['{0} - Computer Density (Number per 1,000 ft\\xef\\xbe\\xb2)'.format(name)] =  'ITSystem:Density'
+    ONTOLOGY[fields]['{0} - Gross Floor Area (ft\\xef\\xbe\\xb2)'.format(name)] = 'ITSystem: Density'
+    ONTOLOGY[fields]['{0} - Number of Computers'.format(name)] = 'ITSystem: Quantity',
+    ONTOLOGY[fields]['{0} - Number of Workers on Main Shift'.format(name)] = 'CommercialFacility: Number Of Occupants',
+    ONTOLOGY[fields]['{0} - Percent That Can Be Cooled'.format(name)] = 'Cooling: Percent Of Floor Area Served'
+    ONTOLOGY[fields]['{0} - Percent That Can Be Heated'.format(name)] = 'Heating: Percent Of Floor Area Served'
+    ONTOLOGY[fields]['{0} - Weekly Operating Hours'.format(name)] = 'ActivityArea: Average Weekly Operating Hours',
+    ONTOLOGY[fields]['{0} - Worker Density'.format(name)] = None
+
+
+# For validation we need to know the type to coerce our string data 
+# into, as well as which units are applicable.
+# Our format is as follows:
+#   'field key': ('type', 'units')
+# If a field key is missing, it's presumed to be just ('str', None).
+# I.e. non-measured observational or identification data.
+ONTOLOGY[types] = {
+        'EnergyUse: Energy Use Metric Type: Current Site PDU Input Energy (kWh)': ('float', 'kWh'),
+}
+
+

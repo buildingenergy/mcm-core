@@ -10,6 +10,11 @@ def best_match(s, categories, top_n=5):
     scores = sorted(scores, key=lambda x: x[1])
     return scores[-top_n:]
 
-def match_espm_to_bedes(ontology, column_name, percent_confidence=95):
+
+def fuzzy_in_set(ontology, column_name, percent_confidence=95):
     """Return True if column_name is in the ontology."""
-    return best_match(column_name, ontology.keys()) > percent_confidence
+    match, percent = best_match(
+        column_name, ontology.keys(), top_n=1
+    )[0]
+
+    return percent > percent_confidence

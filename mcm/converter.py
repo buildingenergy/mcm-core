@@ -10,22 +10,6 @@ from val import And, Convert, Optional, Or, Schema
 BEDES_CSV = '../data/BEDES/V8.4/BEDES_REWORKED.csv'
 ESPM_CSV = '../data/ESPM/ESPM_all_fields.csv'
 
-def validate_float(x):
-    return float(x)
-
-def validate_enum(x, choices):
-    return x in choices
-
-def validate_boolean(x):
-    """Example basic boolean validation."""
-    if isinstance(x, bool):
-        return x
-
-    if x.strip().lower() == 'true' or int(x) == 1:
-        return True
-    else:
-        return False
-
 class EspmCsv2Json(CSVParser):
     def __init__(self, csvfile, ontology_name):
         super(EspmCsv2Json, self).__init__(csvfile)
