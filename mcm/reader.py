@@ -1,9 +1,9 @@
-import csv
 import json
-from pprint import pprint
 import operator
+from pprint import pprint
 
 from colorama import init, Fore
+from unicodecsv import DictReader, Sniffer
 
 import matchers
 import validators
@@ -11,8 +11,6 @@ import validators
 """ The Reader module is intended to contain only code which reads data
 out of CSV files. Fuzzy matches, application to data models happens
 elsewhere.
-
-NB: This is spike code so far.
 
 """
 
@@ -30,11 +28,11 @@ class CSVParser(object):
 
     def _get_csv_reader(self, *args, **kwargs):
         """Guess CSV dialect, and return CSV reader."""
-        dialect = csv.Sniffer().sniff(self.csvfile.read(1024))
+        dialect = Sniffer().sniff(self.csvfile.read(1024))
         self.csvfile.seek(0)
 
         if not 'reader_type' in kwargs:
-            return csv.reader(self.csvfile, dialect, **kwargs)
+            return DictReader(self.csvfile, errors='remove')
 
         else:
             reader_type = kwargs.get('reader_type')
@@ -52,10 +50,10 @@ class CSVParser(object):
             new_fields.append(
                 name.strip().lower().replace(' ', '_')
             )
-        self.fieldnames = new_fields
-
-    def next_as_dict(self):
-        return dict(zip(self.fieldnames, self.csvreader.next()))
+        self.csvreader.fieldnames = sorted(new_fields)
+        self.csvreader.unicode_fieldnames = sorted(
+            [unicode(s) for s in new_fields]
+        )
 
 
 class MCMParser(CSVParser):
@@ -168,7 +166,7 @@ class MCMParser(CSVParser):
         while 1:
             r = []
             try:
-                row = self.next_as_dict()
+                row = self.csvreader.next()
             except StopIteration:
                 break
 

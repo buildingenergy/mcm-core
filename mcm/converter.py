@@ -6,7 +6,6 @@ from reader import CSVParser
 
 from val import And, Convert, Optional, Or, Schema
 
-#BEDES_CSV = '../data/BEDES/V8.4/BEDES_Datamodel-08-20-13.csv'
 BEDES_CSV = '../data/BEDES/V8.4/BEDES_REWORKED.csv'
 ESPM_CSV = '../data/ESPM/ESPM_all_fields.csv'
 
@@ -24,8 +23,12 @@ class EspmCsv2Json(CSVParser):
         self.flat_schema = {}
         while 1:
             try:
-                row = self.next_as_dict()
+                row = self.csvreader.next()
                 attr = row.get('field_name')
+                if attr:
+                    # Some hyphens get unicode escaped.
+                    if u'\u2013' in attr:
+                        attr = attr.replace(u'\u2013', u'-')
                 units = row.get('units')
                 self.json['flat_schema'][attr] = units
 
@@ -82,7 +85,7 @@ class BedesCsv2Json(CSVParser):
 
         while 1:
             try:
-                row = self.next_as_dict()
+                row = self.csvreader.next()
                 entity = row.get('entity_name')
                 attr = row.get('attribute_name')
                 if entity:
