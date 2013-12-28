@@ -1,16 +1,29 @@
-import csv
+import json
 import operator
+from pprint import pprint
+
+from colorama import init, Fore
+from unicodecsv import DictReader, Sniffer
+
+import matchers
+import validators
 
 """ The Reader module is intended to contain only code which reads data
 out of CSV files. Fuzzy matches, application to data models happens
 elsewhere.
 
-NB: This is spike code so far.
-
 """
+
+def load_ontology(filename):
+    """Load json structure from a file."""
+    with open(filename, 'rb') as f:
+        return json.loads(f.read())
 
 
 class CSVParser(object):
+    # Character escape sequences to replace
+    CLEAN_SUPER = [u'\ufffd', u'\xb2', u'_']
+
     def __init__(self, csvfile, *args, **kwargs):
         self.csvfile = csvfile
         self.csvreader = self._get_csv_reader(csvfile, **kwargs)
@@ -18,11 +31,11 @@ class CSVParser(object):
 
     def _get_csv_reader(self, *args, **kwargs):
         """Guess CSV dialect, and return CSV reader."""
-        dialect = csv.Sniffer().sniff(self.csvfile.read(1024))
+        dialect = Sniffer().sniff(self.csvfile.read(1024))
         self.csvfile.seek(0)
 
         if not 'reader_type' in kwargs:
-            return csv.reader(self.csvfile, dialect, **kwargs)
+            return DictReader(self.csvfile, errors='remove')
 
         else:
             reader_type = kwargs.get('reader_type')
@@ -34,8 +47,23 @@ class CSVParser(object):
         self.csvfile.seek(0)
         return self.csvreader.next()
 
-    def next_as_dict(self):
-        return dict(zip(self.fieldnames, self.csvreader.next()))
+    def clean_super(self, col, replace=u'2'):
+        """Cleans up various superscript unicode escapes."""
+        for item in self.CLEAN_SUPER:
+            col = col.replace(item, unicode(replace))
+
+        return col
+
+    def sanitize_fieldnames(self):
+        new_fields = []
+        for name in self.fieldnames:
+            new_fields.append(
+                self.clean_super(name).strip().lower().replace(' ', '_')
+            )
+        self.csvreader.fieldnames = sorted(new_fields)
+        self.csvreader.unicode_fieldnames = sorted(
+            [unicode(s) for s in new_fields]
+        )
 
 
 class MCMParser(CSVParser):
@@ -51,7 +79,7 @@ class MCMParser(CSVParser):
     """
     def __init__(self, csvfile, ontologies, *args, **kwargs):
         super(MCMParser, self).__init__(csvfile, args, kwargs)
-        self.ontologies = self._prepare_column_ontologies(ontologies)
+        #self.ontologies = self._prepare_column_ontologies(ontologies)
         if not 'matching_func' in kwargs:
             # Special note, contains expects argumengs like the following
             # contains(a, b); tests outcome of ``b in a``
@@ -73,24 +101,24 @@ class MCMParser(CSVParser):
 
         return ontologies
 
-    def get_columns(self):
+    def _get_columns(self):
         """Return just the column names."""
         self.csvfile.seek(0)
         return self.csvreader.next()
 
-    def match_columns(self, raw_columns, ontology):
+    def get_mapped_columns(self, ontology):
         """Return matched and unmatched columns.
 
-        :param raw_columns: iterable of str, the read names.
-        :ontology: iterable of str, the column names we match against.
+        :param ontology: iterable of str, the column names we match against.
         :returns: tuple of iterables, matching the ones that match this
         ontology, not_matching, the rest of the column names.
 
         """
+        raw_columns = self._get_columns()
         matching = []
         not_matching = []
         for name in raw_columns:
-            if self.matching_func(ontology, name):
+            if self.matching_func(ontology['fields'], name):
                 matching.append(name)
             else:
                 not_matching.append(name)
@@ -129,28 +157,80 @@ class MCMParser(CSVParser):
 
         return matched_result, common_unmatched
 
+    def get_validator(self, column, ontology):
+        """return a function that validates/coerces a given field."""
+        if column in ontology['types']:
+            data_type, units = ontology['types'][column]
+            return getattr(validators, '{0}_validator'.format(data_type))
+        return validators.default_validator
+
+    def get_clean_row_data(self, matched_columns, ontology):
+        """Runs validation gainst each row, separately returns extra data."""
+        # If table-specific, like BEDES, figure out which table we're looking at
+        # Now look at the columns in the user-data, see if they match our schema
+        # Put their data in the appropriate dictionary
+        # Save the extra data in a separate dictionary
+
+        matched_rows = []
+        unmatched_rows = []
+        while 1:
+            r = []
+            try:
+                row = self.csvreader.next()
+            except StopIteration:
+                break
+
+            for column in matched_columns:
+                if column in row:
+                    r.append(row[column])
+                    #r.append(self.get_validator(column, ontology)(
+                    #    ontology['types'].get(column)
+                    #))
+
+            matched_rows.append(r)
+
+        # Don't actually produce any unmapped data yet.
+        return matched_rows, None
+
 
 def main():
     """Just some contrived test code."""
     #
     ## Test ontology column names
     ###
+    init() # for colors.
+    from ontologies import espm
+    with open('../data/test/sample.csv', 'rb') as f:
+        ontology = espm.ONTOLOGY
+        parser = MCMParser(
+            f,
+            [ontology],  # is designed to handle multiple
+            matching_func=matchers.fuzzy_in_set
+        )
+        mapped, unmapped = parser.get_mapped_columns(ontology)
 
-    fake_ontology = ('Name', 'Date', 'Location',)
-    other_ontology = ('Name', 'Status',)
-    ontologies = {'fake': fake_ontology, 'other': other_ontology,}
+        if not mapped:
+            print Fore.RED + 'no mappings found :('
+            return
 
-    f = open('../data/test/database.csv', 'rb')
-    parser = MCMParser(f, ontologies)
+        num_items = len(mapped) + len(unmapped)
+        print Fore.GREEN + (
+            '\n\n{0:.2f} percent mapped to our ontology,'
+            ' with {1} items.\n\n').format(
+            len(mapped)/float(num_items) * 100,
+            len(mapped)
+        )
 
-    columns_raw = parser.get_columns()
-    print 'Raw: {0}'.format(columns_raw)
+        print Fore.YELLOW + '\nMatching columns:'
+        pprint(mapped)
+        print Fore.MAGENTA + '\nUnmatched columns:'
+        pprint(unmapped)
+        print(Fore.RESET)
+        cleaned, extra = parser.get_clean_row_data(mapped, ontology)
+        #Will need to relate this by which building.
+        # Save data, etc.
 
-    columns = parser.match_columns(columns_raw, fake_ontology)
-    print 'Matched: {0}, and unmatched {1}'.format(columns[0], columns[1])
-
-    print parser.group_columns_by_ontology(columns_raw)
-
+        import ipdb; ipdb.set_trace()
 
 if __name__ == '__main__':
     main()
