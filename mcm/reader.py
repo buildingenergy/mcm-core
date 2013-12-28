@@ -21,6 +21,9 @@ def load_ontology(filename):
 
 
 class CSVParser(object):
+    # Character escape sequences to replace
+    CLEAN_SUPER = [u'\ufffd', u'\xb2', u'_']
+
     def __init__(self, csvfile, *args, **kwargs):
         self.csvfile = csvfile
         self.csvreader = self._get_csv_reader(csvfile, **kwargs)
@@ -44,11 +47,18 @@ class CSVParser(object):
         self.csvfile.seek(0)
         return self.csvreader.next()
 
+    def clean_super(self, col, replace=u'2'):
+        """Cleans up various superscript unicode escapes."""
+        for item in self.CLEAN_SUPER:
+            col = col.replace(item, unicode(replace))
+
+        return col
+
     def sanitize_fieldnames(self):
         new_fields = []
         for name in self.fieldnames:
             new_fields.append(
-                name.strip().lower().replace(' ', '_')
+                self.clean_super(name).strip().lower().replace(' ', '_')
             )
         self.csvreader.fieldnames = sorted(new_fields)
         self.csvreader.unicode_fieldnames = sorted(
