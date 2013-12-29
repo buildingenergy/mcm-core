@@ -9,9 +9,9 @@ All fields found in the ontology, but not mentioned in this mapping
 go into the ``extra_data`` attribute, which is a json field in Postgres.
 
 """
-MAPPER = {
+MAP = {
     # Could there be a better key for this?
-    u'Custom Property ID 1 - ID': u'property_id',
+    u'Property Id': u'property_id',
     u'Address 1': u'address_1',
     u'Address 2': u'address_2',
     u'City': u'city',
