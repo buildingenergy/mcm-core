@@ -2,12 +2,9 @@ import json
 import operator
 from pprint import pprint
 
-from colorama import init, Fore
 from unicodecsv import DictReader, Sniffer
 
-from mappings.espm import MAP
-import matchers
-import validators
+from mcm import mappings, matchers, validators
 
 """ The Reader module is intended to contain only code which reads data
 out of CSV files. Fuzzy matches, application to data models happens
@@ -145,14 +142,13 @@ def main():
     #
     ## Test ontology column names
     ###
-    init() # for colors.
     class FakeModel(object):
         def save():
             pass
 
     with open('../data/test/espm_mapping.csv', 'rb') as f:
         parser = MCMParser(f)
-        mapping = MAP
+        mapping = mappings.espm.MAP
         model_class = FakeModel
         #TODO(gavin): currently saving everything as strings
         for m in parser.map_rows(mapping, model_class):
