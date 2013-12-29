@@ -1,10 +1,12 @@
 import json
 import operator
 from pprint import pprint
+import sys
 
 from unicodecsv import DictReader, Sniffer
 
-from mcm import mappings, matchers, validators
+from mcm.mappings import espm
+from mcm import matchers, validators
 
 """ The Reader module is intended to contain only code which reads data
 out of CSV files. Fuzzy matches, application to data models happens
@@ -146,9 +148,12 @@ def main():
         def save():
             pass
 
-    with open('../data/test/espm_mapping.csv', 'rb') as f:
+    if len(sys.argv) < 2:
+        sys.exit('You need to specify a CSV file path.')
+
+    with open(sys.argv[1], 'rb') as f:
         parser = MCMParser(f)
-        mapping = mappings.espm.MAP
+        mapping = espm.MAP
         model_class = FakeModel
         #TODO(gavin): currently saving everything as strings
         for m in parser.map_rows(mapping, model_class):
