@@ -6,7 +6,7 @@ import sys
 from unicodecsv import DictReader, Sniffer
 
 from mcm.mappings import espm
-from mcm import matchers, validators
+from mcm import cleaners, matchers
 
 """ The Reader module is intended to contain only code which reads data
 out of CSV files. Fuzzy matches, application to data models happens
@@ -60,7 +60,7 @@ class CSVParser(object):
         for col in self.fieldnames:
             new_fields.append(self._clean_super(col))
 
-        self.csvreader.fieldnames = fields = sorted(new_fields)
+        self.csvreader.unicode_fieldnames = sorted(new_fields)
 
     def sanitize_fieldnames(self):
         new_fields = []
@@ -108,17 +108,24 @@ class MCMParser(CSVParser):
         self.csvfile.seek(0)
         return self.csvreader.next()
 
+    def clean_value(self, value, column_name):
+        """Try to convert the value to one matching the column's type."""
+        return cleaners.default_cleaner(value)
 
     def _map_row(self, row, mapping, model):
         """Apply mapping of row data to model."""
-        unmapped = []
         for item in row:
+            cleaned_value = self.clean_value(row[item], item)
             if item in mapping:
-                setattr(model, mapping.get(item), row[item])
+                setattr(model, mapping.get(item), cleaned_value)
             elif hasattr(model, 'extra_data'):
-                model.extra_data[item] = row[item]
+                if not isinstance(model.extra_data, dict):
+                    # sometimes our dict is returned as JSON string.
+                    # TODO: Need to resolve this upstream with djorm-ext-jsonfield.
+                    model.extra_data = json.loads(model.extra_data)
+                model.extra_data[item] = cleaned_value
             else:
-                model.extra_data = {item: row[item]}
+                model.extra_data = {item: cleaned_value}
 
         return model
 
@@ -129,14 +136,21 @@ class MCMParser(CSVParser):
             # e.g. model.objects.get('some canonical id') or model_class()
             yield self._map_row(row, mapping, model_class())
 
-    def get_validator(self, column, ontology):
-        """return a function that validates/coerces a given field."""
-        if column in ontology['types']:
-            data_type, units = ontology['types'][column]
 
-            return getattr(validators, '{0}_validator'.format(data_type))
+class EspmMCMParser(MCMParser):
+    """ESPM-specific flavor."""
 
-        return validators.default_validator
+    def __init__(self, csvfile, *args, **kwargs):
+        super(EspmMCMParser, self).__init__(csvfile, args, kwargs)
+        self.schema = load_ontology('../data/espm/espm.json')['flat_schema']
+        # Basically anything that has units is a float number.
+        self.float_columns = filter(lambda x: self.schema[x], self.schema)
+
+    def clean_values(self, value, column_name):
+        # Apply default cleaning, turning it into a None if need be, etc.
+        value = super(EspmMCMParser, self).clean_values(value, colunn_name)
+        if column_name in self.float_columns:
+            return cleaners.float_cleaner(value)
 
 
 def main():
@@ -145,19 +159,21 @@ def main():
     ## Test ontology column names
     ###
     class FakeModel(object):
-        def save():
+        def save(self):
             pass
 
     if len(sys.argv) < 2:
         sys.exit('You need to specify a CSV file path.')
 
     with open(sys.argv[1], 'rb') as f:
-        parser = MCMParser(f)
+        parser = EspmMCMParser(f)
         mapping = espm.MAP
         model_class = FakeModel
         #TODO(gavin): currently saving everything as strings
         for m in parser.map_rows(mapping, model_class):
             m.save()
+
+        import ipdb; ipdb.set_trace()
 
 if __name__ == '__main__':
     main()

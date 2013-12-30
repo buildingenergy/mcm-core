@@ -11,10 +11,10 @@ def best_match(s, categories, top_n=5):
     return scores[-top_n:]
 
 
-def fuzzy_in_set(ontology, column_name, percent_confidence=95):
+def fuzzy_in_set(column_name, ontology, percent_confidence=95):
     """Return True if column_name is in the ontology."""
     match, percent = best_match(
-        column_name, ontology.keys(), top_n=1
+        column_name, ontology, top_n=1
     )[0]
 
     return percent > percent_confidence
