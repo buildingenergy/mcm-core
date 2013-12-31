@@ -15,4 +15,9 @@ Developing
 Testing
 -------
 
-Still a work in progress.
+Unfortunately, there are some directory path issues still baked in.
+To run tests you have to be in the ``tests`` directory:
+
+```bash
+    cd tests && nosetests
+```
