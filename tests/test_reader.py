@@ -3,16 +3,7 @@ from unittest import TestCase, skip
 import unicodecsv
 
 from mcm import reader
-
-def _list_has_substring(substring, l):
-    """Return True if substring occurs in list l."""
-    found_substring = False
-    for item in l:
-        if substring in item:
-            found_substring = True
-            break
-
-    return found_substring
+from mcm.tests import utils
 
 
 class TestCSVParser(TestCase):
@@ -49,13 +40,13 @@ class TestCSVParser(TestCase):
         """Call _clean_super on all fieldnames."""
         escape = u'\xb2'
         # We know we have one of these escapes in our columns...
-        self.assertTrue(_list_has_substring(
+        self.assertTrue(utils.list_has_substring(
             escape, self.parser.csvreader.unicode_fieldnames
         ))
 
         self.parser.clean_super_scripts()
 
-        self.assertFalse(_list_has_substring(
+        self.assertFalse(utils.list_has_substring(
             escape, self.parser.csvreader.unicode_fieldnames
         ))
 

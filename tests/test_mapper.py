@@ -1,19 +1,7 @@
 from unittest import TestCase
 
 from mcm import mapper
-
-
-class FakeManager(object):
-    def get_or_create(*args, **kwargs):
-        return FakeModel(), True
-
-
-class FakeModel(object):
-    """Used for testing purposes, only."""
-    objects = FakeManager()
-
-    def save(self):
-        pass
+from mcm.tests.util import FakeModel
 
 
 class TestMapper(TestCase):
