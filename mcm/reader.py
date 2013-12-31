@@ -27,7 +27,6 @@ class CSVParser(object):
     def __init__(self, csvfile, *args, **kwargs):
         self.csvfile = csvfile
         self.csvreader = self._get_csv_reader(csvfile, **kwargs)
-        self.fieldnames = self.get_columns()
 
     def _get_csv_reader(self, *args, **kwargs):
         """Guess CSV dialect, and return CSV reader."""
@@ -42,11 +41,6 @@ class CSVParser(object):
             del kwargs['reader_type']
             return reader_type(self.csvfile, dialect, **kwargs)
 
-    def get_columns(self):
-        """Return just the column names."""
-        self.csvfile.seek(0)
-        return self.csvreader.next()
-
     def _clean_super(self, col, replace=u'2'):
         """Cleans up various superscript unicode escapes."""
         for item in self.CLEAN_SUPER:
@@ -57,7 +51,7 @@ class CSVParser(object):
     def clean_super_scripts(self):
         """Replaces column names with clean ones."""
         new_fields = []
-        for col in self.fieldnames:
+        for col in self.csvreader.unicode_fieldnames:
             new_fields.append(self._clean_super(col))
 
         self.csvreader.unicode_fieldnames = sorted(new_fields)
@@ -146,9 +140,9 @@ class EspmMCMParser(MCMParser):
         # Basically anything that has units is a float number.
         self.float_columns = filter(lambda x: self.schema[x], self.schema)
 
-    def clean_values(self, value, column_name):
+    def clean_value(self, value, column_name):
         # Apply default cleaning, turning it into a None if need be, etc.
-        value = super(EspmMCMParser, self).clean_values(value, colunn_name)
+        value = super(EspmMCMParser, self).clean_value(value, column_name)
         if column_name in self.float_columns:
             return cleaners.float_cleaner(value)
 

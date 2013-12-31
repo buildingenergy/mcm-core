@@ -1,7 +1,7 @@
 from mcm.matchers import fuzzy_in_set
 
 
-NONE_SYNONYMS = (u'not available', u'n/a')
+NONE_SYNONYMS = (u'not available', u'not applicable', u'none', u'n/a')
 BOOL_SYNONYMS = (u'true', u'yes', u'y', u'1')
 
 
