@@ -9,3 +9,16 @@ def list_has_substring(substring, l):
     return found_substring
 
 
+class FakeManager(object):
+    def get_or_create(*args, **kwargs):
+        return FakeModel(), True
+
+
+class FakeModel(object):
+    """Used for testing purposes, only."""
+    objects = FakeManager()
+
+    def save(self):
+        pass
+
+
