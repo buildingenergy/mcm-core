@@ -1,7 +1,7 @@
 from mcm.matchers import fuzzy_in_set
 
 
-NONE_SYNONYMS = (u'not available', u'not applicable', u'none', u'n/a')
+NONE_SYNONYMS = (u'not available', u'not applicable', u'n/a')
 BOOL_SYNONYMS = (u'true', u'yes', u'y', u'1')
 
 
@@ -14,11 +14,15 @@ def default_cleaner(value, *args):
 
 
 def float_cleaner(value, *args):
-    """Try to determine if we're a boolean."""
+    """Try to clean value, coerce it into a float."""
+    if not value:
+        return None
     try:
         value = float(value)
     except ValueError:
+
         return None
+
     return value
 
 
@@ -27,7 +31,7 @@ def enum_cleaner(value, choices, *args):
     return fuzzy_in_set(value, choices) or None
 
 
-def boolean_cleaner(value, *args):
+def bool_cleaner(value, *args):
     if isinstance(value, bool):
         return value
 
@@ -35,3 +39,20 @@ def boolean_cleaner(value, *args):
         return True
     else:
         return False
+
+
+class Cleaner(object):
+    """Cleans values for a given ontology."""
+    def __init__(self, ontology):
+        self.ontology = ontology
+        self.schema = self.ontology['flat_schema']
+        self.float_columns = filter(lambda x: self.schema[x], self.schema)
+
+    def clean_value(self, value, column_name):
+        """Clean the value, based on characteristics of its column_name."""
+        value = default_cleaner(value)
+        if column_name in self.float_columns:
+            value = float_cleaner(value)
+
+        return value
+
