@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from mcm import mapper
-from mcm.tests.util import FakeModel
+from mcm.tests.utils import FakeModel
 
 
 class TestMapper(TestCase):

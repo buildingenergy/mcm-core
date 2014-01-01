@@ -4,7 +4,7 @@ import sys
 
 from unicodecsv import DictReader, Sniffer
 
-from mcm import cleaners, mapper, matchers
+from mcm import cleaners, mapper, matchers, utils
 
 
 """ The Reader module is intended to contain only code which reads data
@@ -92,6 +92,12 @@ class MCMParser(CSVParser):
 
         else:
             self.matching_func = kwargs.get('matching_func')
+
+
+    def split_rows(self, chunk_size, callback):
+        """Break up the CSV into smaller pieces for parallel processing."""
+        for batch in utils.batch(self.next(), chunk_size):
+            callback(batch)
 
     def map_rows(self, mapping, model_class):
         """Convenience method to call ``mapper.map_row`` on all rows.

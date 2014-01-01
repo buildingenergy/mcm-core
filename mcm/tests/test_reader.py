@@ -50,3 +50,35 @@ class TestCSVParser(TestCase):
             escape, self.parser.csvreader.unicode_fieldnames
         ))
 
+
+class TestMCMParser(TestCase):
+    def setUp(self):
+        self.csv_f = open('test_data/test_espm.csv', 'rb')
+        self.parser = reader.MCMParser(self.csv_f)
+        self.total_callbacks = 0
+
+    def my_callback(self, rows):
+        self.total_callbacks += 1
+
+    def tearDown(self):
+        self.csv_f.close()
+
+    def test_split_rows(self):
+        """Ensure splitting rows up works as expected."""
+        self.parser.split_rows(1, self.my_callback)
+        # Since there are three lines of test_data, and
+        # we specified a chunk size of 1, we should get 3 callbacks.
+        self.assertEqual(self.total_callbacks, 3)
+
+    def test_split_rows_w_extra(self):
+        """ensure splitting rows works when there's remainder."""
+        self.parser.split_rows(2, self.my_callback)
+        # There are three rows, the first two in the first batch,
+        # the last one in its own.
+        self.assertEqual(self.total_callbacks, 2)
+
+
+    def test_split_rows_w_large_batch(self):
+        self.parser.split_rows(5000, self.my_callback)
+        # There's always at least one batch per file.
+        self.assertEqual(self.total_callbacks, 1)
