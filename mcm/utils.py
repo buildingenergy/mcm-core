@@ -13,3 +13,8 @@ def batch(iterable, size):
         batchiter = islice(sourceiter, size)
         yield list(chain([batchiter.next()], batchiter))
 
+
+def load_ontology(filename):
+    """Load json structure from a file."""
+    with open(filename, 'rb') as f:
+        return json.loads(f.read())

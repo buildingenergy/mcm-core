@@ -14,12 +14,6 @@ elsewhere.
 """
 
 
-def load_ontology(filename):
-    """Load json structure from a file."""
-    with open(filename, 'rb') as f:
-        return json.loads(f.read())
-
-
 class CSVParser(object):
     # Character escape sequences to replace
     CLEAN_SUPER = [u'\ufffd', u'\xb2', u'_']
