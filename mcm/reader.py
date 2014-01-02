@@ -109,7 +109,7 @@ class MCMParser(CSVParser):
 def main():
     """Just some contrived test code."""
     from mcm.mappings import espm
-    from mcm.tests.test_mapper import FakeModel
+    from mcm.tests.utils import FakeModel
 
     if len(sys.argv) < 2:
         sys.exit('You need to specify a CSV file path.')
