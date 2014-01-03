@@ -54,7 +54,7 @@ class CSVParser(object):
         for col in self.csvreader.unicode_fieldnames:
             new_fields.append(self._clean_super(col))
 
-        self.csvreader.unicode_fieldnames = sorted(new_fields)
+        self.csvreader.unicode_fieldnames = new_fields
 
     def next(self):
         """Wouldn't it be nice to get iterables form csvreader?"""
