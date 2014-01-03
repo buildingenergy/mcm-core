@@ -12,8 +12,8 @@ go into the ``extra_data`` attribute, which is a json field in Postgres.
 MAP = {
     # Could there be a better key for this?
     u'Property Id': u'property_id',
-    u'Address 1': u'address_1',
-    u'Address 2': u'address_2',
+    u'Address 1': u'address_line_1',
+    u'Address 2': u'address_line_2',
     u'City': u'city',
     u'County': u'county',
     u'Country': u'country',
