@@ -1,7 +1,6 @@
 import json
 
-from cleaners import default_cleaner
-import utils
+from cleaners import default_cleaner, utils
 
 
 class MappingError(Exception):
