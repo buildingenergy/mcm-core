@@ -1,6 +1,7 @@
 import json
 
 from cleaners import default_cleaner
+import utils
 
 
 class MappingError(Exception):
@@ -22,8 +23,12 @@ def get_model_inst(model_class, row):
     :rtype: tuple, (model_inst, bool)
 
     """
-    year_ending = default_cleaner(row.get('Year Ending'))
-    property_id = default_cleaner(row.get('Property Id'))
+    year_ending = utils.date_str_to_date(
+        default_cleaner(row.get('Year Ending'))
+    )
+    property_id = utils.date_str_to_date(
+        default_cleaner(row.get('Property Id'))
+    )
     if not year_ending or not property_id:
         raise MappingError('`Year Ending` or `Property Id` not defined')
 

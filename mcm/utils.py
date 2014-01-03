@@ -1,3 +1,4 @@
+import dateutil
 from itertools import islice, chain
 
 def batch(iterable, size):
@@ -14,7 +15,14 @@ def batch(iterable, size):
         yield list(chain([batchiter.next()], batchiter))
 
 
+def date_str_to_date(date_str):
+    return dateutil.parser.parse(date_str)
+
+
 def load_ontology(filename):
     """Load json structure from a file."""
     with open(filename, 'rb') as f:
         return json.loads(f.read())
+
+
+
