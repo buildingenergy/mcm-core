@@ -1,4 +1,4 @@
-import dateutil
+from dateutil import parser
 from itertools import islice, chain
 
 def batch(iterable, size):
@@ -16,7 +16,8 @@ def batch(iterable, size):
 
 
 def date_str_to_date(date_str):
-    return dateutil.parser.parse(date_str)
+    if date_str:
+        return parser.parse(date_str)
 
 
 def load_ontology(filename):

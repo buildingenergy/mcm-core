@@ -1,6 +1,7 @@
 import json
 
-from cleaners import default_cleaner, utils
+from mcm import utils
+from mcm.cleaners import default_cleaner
 
 
 class MappingError(Exception):
