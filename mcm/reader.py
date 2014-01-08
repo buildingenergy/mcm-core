@@ -90,8 +90,12 @@ class MCMParser(CSVParser):
 
     def split_rows(self, chunk_size, callback):
         """Break up the CSV into smaller pieces for parallel processing."""
+        row_num = 0
         for batch in utils.batch(self.next(), chunk_size):
+            row_num += len(batch)
             callback(batch)
+
+        return row_num
 
     def map_rows(self, mapping, model_class):
         """Convenience method to call ``mapper.map_row`` on all rows.

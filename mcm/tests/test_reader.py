@@ -65,17 +65,19 @@ class TestMCMParser(TestCase):
 
     def test_split_rows(self):
         """Ensure splitting rows up works as expected."""
-        self.parser.split_rows(1, self.my_callback)
+        num_rows = self.parser.split_rows(1, self.my_callback)
         # Since there are three lines of test_data, and
         # we specified a chunk size of 1, we should get 3 callbacks.
         self.assertEqual(self.total_callbacks, 3)
+        self.assertEqual(num_rows, 3)
 
     def test_split_rows_w_extra(self):
         """ensure splitting rows works when there's remainder."""
-        self.parser.split_rows(2, self.my_callback)
+        num_rows = self.parser.split_rows(2, self.my_callback)
         # There are three rows, the first two in the first batch,
         # the last one in its own.
         self.assertEqual(self.total_callbacks, 2)
+        self.assertEqual(num_rows, 3)
 
 
     def test_split_rows_w_large_batch(self):
