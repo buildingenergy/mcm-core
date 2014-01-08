@@ -88,12 +88,12 @@ class MCMParser(CSVParser):
             self.matching_func = kwargs.get('matching_func')
 
 
-    def split_rows(self, chunk_size, callback):
+    def split_rows(self, chunk_size, callback, *args, **kwargs):
         """Break up the CSV into smaller pieces for parallel processing."""
         row_num = 0
         for batch in utils.batch(self.next(), chunk_size):
             row_num += len(batch)
-            callback(batch)
+            callback(batch, *args, **kwargs)
 
         return row_num
 
