@@ -1,4 +1,4 @@
-{u'flat_schema': {u'Address 1': u'',
+schema = {u'flat_schema': {u'Address 1': u'',
                   u'Address 2': u'',
                   u'Adult Education - Computer Density': u'Number per 1,000 ft2',
                   u'Adult Education - Gross Floor Area': u'ft2',
