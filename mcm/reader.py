@@ -28,7 +28,7 @@ class CSVParser(object):
         self.csvfile.seek(0)
 
         if not 'reader_type' in kwargs:
-            return DictReader(self.csvfile, errors='remove')
+            return DictReader(self.csvfile, errors='replace')
 
         else:
             reader_type = kwargs.get('reader_type')
