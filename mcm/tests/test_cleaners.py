@@ -27,6 +27,8 @@ class TestCleaners(TestCase):
         self.assertEqual(cleaners.float_cleaner(u'wut'), None)
         self.assertEqual(cleaners.float_cleaner(u''), None)
         self.assertEqual(cleaners.float_cleaner(None), None)
+        self.assertEqual(cleaners.float_cleaner(u'12,090'), 12090)
+        self.assertEqual(cleaners.float_cleaner(u'12,090 ?'), 12090)
 
     def test_clean_value(self):
         """Test that the ``Cleaner`` object properly routes cleaning."""
