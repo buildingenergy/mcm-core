@@ -1,8 +1,14 @@
+import re
+import string
+
 from mcm.matchers import fuzzy_in_set
 
 
 NONE_SYNONYMS = (u'not available', u'not applicable', u'n/a')
 BOOL_SYNONYMS = (u'true', u'yes', u'y', u'1')
+PUNCT_REGEX = re.compile('[{0}]'.format(
+    re.escape(string.punctuation.replace('.', '')))
+)
 
 
 def default_cleaner(value, *args):
@@ -18,6 +24,7 @@ def float_cleaner(value, *args):
     if not value:
         return None
     try:
+        value = PUNCT_REGEX.sub('', value)
         value = float(value)
     except ValueError:
 
