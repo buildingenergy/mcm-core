@@ -8,7 +8,7 @@ class MappingError(Exception):
     pass
 
 
-def get_model_inst(model_class, row):
+def get_model_inst(model_class, row, *args, **kwargs):
     """Return a model instance given a class and some row data.
 
     **Warning**
@@ -30,12 +30,19 @@ def get_model_inst(model_class, row):
     if not year_ending or not property_id:
         raise MappingError('`Year Ending` or `Property Id` not defined')
 
-    return model_class.objects.get_or_create(
-        year_ending=year_ending, property_id=int(property_id)
-    )
+    get_or_create_criteria = {
+        'year_ending': year_ending,
+        'property_id': int(property_id),
+    }
+
+    extra_criteria = kwargs.get('extra_criteria')
+    if extra_criteria:
+        get_or_create_criteria.update(extra_criteria)
+
+    return model_class.objects.get_or_create(**get_or_create_criteria)
 
 
-def map_row(row, mapping, model_class, cleaner=None):
+def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
     """Apply mapping of row data to model.
 
     :param row: dict, parsed row data from csv.
@@ -45,7 +52,7 @@ def map_row(row, mapping, model_class, cleaner=None):
     :rtype: model_inst, with mapped data attributes; ready to save.
 
     """
-    model, created = get_model_inst(model_class, row)
+    model, created = get_model_inst(model_class, row, *args, **kwargs)
     for item in row:
         if cleaner:
             cleaned_value = cleaner.clean_value(row[item], item)
