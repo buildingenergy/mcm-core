@@ -5,7 +5,7 @@ machine:
 
 dependencies:
     override:
-        - venv/bin/pip install -r requirements.txt
+        - venv/bin/pip install -r requirements-testing.txt
 
 test:
     override:
