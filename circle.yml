@@ -1,0 +1,12 @@
+machine:
+    python:
+        version: 2.7.3
+    timezone: America/Los_Angeles
+
+dependencies:
+    override:
+        - venv/bin/pip install -r requirements.txt
+
+test:
+    override:
+        - cd mcm/tests && nosetests
