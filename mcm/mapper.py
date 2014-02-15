@@ -42,6 +42,36 @@ def get_model_inst(model_class, row, *args, **kwargs):
     return model_class.objects.get_or_create(**get_or_create_criteria)
 
 
+def build_column_mapping(
+    raw_columns, dest_columns, previous_mapping=None, map_args=None
+    ):
+    """Build a probabalistic mapping structure for mapping raw to dest.
+
+    :param raw_columns: list of str. The column names we're trying to map.
+    :param dest_columns: list of str. The columns we're mapping to.
+    :param previous_mapping: callable. Used to return the previous mapping
+        for a given field.
+
+        Example:
+        previous_mapping('example field', *map_args) ->
+            ('example field', 'Field 1')
+
+    :returns dict: {'dest_column': [('raw_column', score)...],...}
+
+    """
+    probable_mapping = {}
+    for dest in dest_columns:
+        result = []
+        # We want previous mappings to be at the top of the list.
+        if previous_mapping and iscallable(previous_mapping):
+            args = map_args or []
+            result = previous_mapping(dest, *args)
+
+        probable_mapping[dest] = result.extend(
+            matchers.best_match(dest, raw_columns)
+        )
+
+
 def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
     """Apply mapping of row data to model.
 
