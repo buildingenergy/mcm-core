@@ -33,7 +33,7 @@ class TestMapper(TestCase):
     expected = {
         u'custom_id_1': [
             (u'City', 27), (u'Building ID', 27), (u'Name', 13)
-        ], 
+        ],
         u'city': [
             (u'City', 100), (u'Building ID', 13), (u'BBL', 0)
         ],
@@ -87,24 +87,6 @@ class TestMapper(TestCase):
 
     def test_build_column_mapping(self):
         """Create a useful set of suggestions for mappings."""
-        expected = {
-            u'custom_id_1': [
-                (u'City', 27), (u'Building ID', 27), (u'Name', 13)
-            ],
-            u'city': [
-                (u'City', 100), (u'Building ID', 13), (u'BBL', 0)
-            ],
-            u'tax_lot_id': [
-                (u'Building ID', 29), (u'Address', 24), (u'BBL', 15)
-            ],
-            u'name': [
-                (u'Name', 100), (u'Address', 36), (u'Building ID', 13)
-            ],
-            u'address_line_1': [
-                (u'Address', 67), (u'Building ID', 24), (u'Name', 22)
-            ]
-        }
-
         dyn_mapping = mapper.build_column_mapping(
             self.raw_columns, self.dest_columns
         )
