@@ -58,6 +58,7 @@ def build_column_mapping(
         # dest key. If it finds a match, it returns the raw_column and score.
         previous_mapping('example field', *map_args) ->
             ('Field1', 0.93)
+        ``
 
     :returns dict: {'dest_column': [('raw_column', score)...],...}
 
