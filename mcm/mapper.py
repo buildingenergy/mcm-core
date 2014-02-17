@@ -1,6 +1,6 @@
 import json
 
-from mcm import utils
+from mcm import matchers, utils
 from mcm.cleaners import default_cleaner
 
 
@@ -53,8 +53,11 @@ def build_column_mapping(
         for a given field.
 
         Example:
+        ``
+        # The expectation is that our callable always gets passed a
+        # dest key. If it finds a match, it returns the raw_column and score.
         previous_mapping('example field', *map_args) ->
-            ('example field', 'Field 1')
+            ('Field1', 0.93)
 
     :returns dict: {'dest_column': [('raw_column', score)...],...}
 
@@ -63,13 +66,21 @@ def build_column_mapping(
     for dest in dest_columns:
         result = []
         # We want previous mappings to be at the top of the list.
-        if previous_mapping and iscallable(previous_mapping):
+        if previous_mapping and callable(previous_mapping):
             args = map_args or []
-            result = previous_mapping(dest, *args)
+            result = previous_mapping(dest, *args) or []
 
-        probable_mapping[dest] = result.extend(
-            matchers.best_match(dest, raw_columns)
+        result.extend(
+            sorted(
+                matchers.best_match(dest, raw_columns, top_n=3),
+                key=lambda x: x[1],
+                reverse=True
+            )
         )
+
+        probable_mapping[dest] = result
+
+    return probable_mapping
 
 
 def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
