@@ -1,3 +1,4 @@
+import copy
 from unittest import TestCase
 
 from mcm import mapper
@@ -5,14 +6,47 @@ from mcm.tests.utils import FakeModel
 
 
 class TestMapper(TestCase):
+    # Pre-existing static mapping
+    fake_mapping = {
+        u'Property Id': u'property_id',
+        u'Year Ending': u'year_ending',
+        u'heading1': u'heading_1',
+        u'heading2': u'heading_2',
+    }
 
-    def setUp(self):
-        self.fake_mapping = {
-            u'Property Id': u'property_id',
-            u'Year Ending': u'year_ending',
-            u'heading1': u'heading_1',
-            u'heading2': u'heading_2',
-        }
+    # Columns we get from the user's CSV
+    raw_columns = [
+        u'Address',
+        u'Name',
+        u'City',
+        u'BBL',
+        u'Building ID',
+    ]
+    # Columns we'll try to create a mapping to dynamically
+    dest_columns = [
+        u'address_line_1',
+        u'name',
+        u'city',
+        u'tax_lot_id',
+        u'custom_id_1'
+    ]
+    expected = {
+        u'custom_id_1': [
+            (u'City', 27), (u'Building ID', 27), (u'Name', 13)
+        ],
+        u'city': [
+            (u'City', 100), (u'Building ID', 13), (u'BBL', 0)
+        ],
+        u'tax_lot_id': [
+            (u'Building ID', 29), (u'Address', 24), (u'BBL', 15)
+        ],
+        u'name': [
+            (u'Name', 100), (u'Address', 36), (u'Building ID', 13)
+        ],
+        u'address_line_1': [
+            (u'Address', 67), (u'Building ID', 24), (u'Name', 22)
+        ]
+    }
 
     def test_map_row(self):
         """Test the mapping between csv values and python objects."""
@@ -50,3 +84,38 @@ class TestMapper(TestCase):
         self.assertRaises(mapper.MappingError, mapper.map_row, *(
             fake_row, self.fake_mapping, fake_model_class,
         ))
+
+    def test_build_column_mapping(self):
+        """Create a useful set of suggestions for mappings."""
+        dyn_mapping = mapper.build_column_mapping(
+            self.raw_columns, self.dest_columns
+        )
+
+        self.assertDictEqual(dyn_mapping, self.expected)
+
+    def test_build_column_mapping_w_callable(self):
+        """Callable result at the begining of the list."""
+
+        expected = copy.deepcopy(self.expected)
+        expected['custom_id_1'] = [
+            # This should be the result of our "previous_mapping" call.
+            (u'Building ID', 1.0),
+            (u'City', 27),
+            (u'Building ID', 27),
+            (u'Name', 13)
+        ]
+
+        # Here we pretend that we're doing a query and returning
+        # relevant results.
+        def get_mapping(dest, *args, **kwargs):
+            if dest == u'custom_id_1':
+                return [(u'Building ID', 1.0)]
+
+        dyn_mapping = mapper.build_column_mapping(
+            self.raw_columns,
+            self.dest_columns,
+            previous_mapping=get_mapping,
+            map_args=(u'custom_id_1',)
+        )
+
+        self.assertDictEqual(dyn_mapping, expected)
