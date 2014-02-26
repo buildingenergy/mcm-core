@@ -43,7 +43,7 @@ def get_model_inst(model_class, row, *args, **kwargs):
 
 
 def build_column_mapping(
-    raw_columns, dest_columns, previous_mapping=None, map_args=None
+    raw_columns, dest_columns, previous_mapping=None, map_args=None, thresh=None
     ):
     """Build a probabalistic mapping structure for mapping raw to dest.
 
@@ -64,22 +64,25 @@ def build_column_mapping(
 
     """
     probable_mapping = {}
+    thresh = thresh or 0
     for dest in dest_columns:
         result = []
         # We want previous mappings to be at the top of the list.
         if previous_mapping and callable(previous_mapping):
             args = map_args or []
-            result = previous_mapping(dest, *args) or []
+            mapping = previous_mapping(dest, *args)
+            if mapping:
+                result, conf = mapping
 
-        result.extend(
-            sorted(
-                matchers.best_match(dest, raw_columns, top_n=3),
-                key=lambda x: x[1],
-                reverse=True
-            )
-        )
+        # Only enter this flow if we haven't already selected a result.
+        if not result:
+            best_match, conf  = matchers.best_match(
+                dest, raw_columns, top_n=1
+            )[0]
+            if conf > thresh:
+                result = best_match
 
-        probable_mapping[dest] = result
+        probable_mapping[dest] = [result, conf]
 
     return probable_mapping
 

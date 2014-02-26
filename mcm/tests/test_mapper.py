@@ -30,22 +30,13 @@ class TestMapper(TestCase):
         u'tax_lot_id',
         u'custom_id_1'
     ]
-    expected = {
-        u'custom_id_1': [
-            (u'City', 27), (u'Building ID', 27), (u'Name', 13)
-        ],
-        u'city': [
-            (u'City', 100), (u'Building ID', 13), (u'BBL', 0)
-        ],
-        u'tax_lot_id': [
-            (u'Building ID', 29), (u'Address', 24), (u'BBL', 15)
-        ],
-        u'name': [
-            (u'Name', 100), (u'Address', 36), (u'Building ID', 13)
-        ],
-        u'address_line_1': [
-            (u'Address', 67), (u'Building ID', 24), (u'Name', 22)
-        ]
+
+    expected ={
+        u'custom_id_1': [u'Building ID', 27],
+        u'city': [u'City', 100],
+        u'tax_lot_id': [u'Building ID', 29],
+        u'name': [u'Name', 100],
+        u'address_line_1': [u'Address', 67]
     }
 
     def test_map_row(self):
@@ -97,25 +88,19 @@ class TestMapper(TestCase):
         """Callable result at the begining of the list."""
 
         expected = copy.deepcopy(self.expected)
-        expected['custom_id_1'] = [
-            # This should be the result of our "previous_mapping" call.
-            (u'Building ID', 1.0),
-            (u'City', 27),
-            (u'Building ID', 27),
-            (u'Name', 13)
-        ]
+        # This should be the result of our "previous_mapping" call.
+        expected['custom_id_1'] = [u'Tax ID', 27]
 
         # Here we pretend that we're doing a query and returning
         # relevant results.
         def get_mapping(dest, *args, **kwargs):
             if dest == u'custom_id_1':
-                return [(u'Building ID', 1.0)]
+                return [u'Tax ID', 27]
 
         dyn_mapping = mapper.build_column_mapping(
             self.raw_columns,
             self.dest_columns,
             previous_mapping=get_mapping,
-            map_args=(u'custom_id_1',)
         )
 
         self.assertDictEqual(dyn_mapping, expected)
