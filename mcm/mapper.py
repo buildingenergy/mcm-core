@@ -77,7 +77,7 @@ def build_column_mapping(
         if not result and conf > thresh:
             result = best_match
 
-        probable_mapping[dest] = result
+        probable_mapping[dest] = [result, conf]
 
     return probable_mapping
 

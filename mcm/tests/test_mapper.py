@@ -32,11 +32,11 @@ class TestMapper(TestCase):
     ]
 
     expected ={
-        u'custom_id_1': u'Building ID',
-        u'city': u'City',
-        u'tax_lot_id': u'Building ID',
-        u'name': u'Name',
-        u'address_line_1':u'Address'
+        u'custom_id_1': [u'Building ID', 27],
+        u'city': [u'City', 100],
+        u'tax_lot_id': [u'Building ID', 29],
+        u'name': [u'Name', 100],
+        u'address_line_1': [u'Address', 67]
     }
 
     def test_map_row(self):
@@ -89,7 +89,7 @@ class TestMapper(TestCase):
 
         expected = copy.deepcopy(self.expected)
         # This should be the result of our "previous_mapping" call.
-        expected['custom_id_1'] = u'Tax ID'
+        expected['custom_id_1'] = [u'Tax ID', 27]
 
         # Here we pretend that we're doing a query and returning
         # relevant results.
