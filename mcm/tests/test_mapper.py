@@ -95,7 +95,7 @@ class TestMapper(TestCase):
         # relevant results.
         def get_mapping(dest, *args, **kwargs):
             if dest == u'custom_id_1':
-                return u'Tax ID'
+                return [u'Tax ID', 27]
 
         dyn_mapping = mapper.build_column_mapping(
             self.raw_columns,
