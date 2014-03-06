@@ -97,7 +97,7 @@ def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
     :rtype: model_inst, with mapped data attributes; ready to save.
 
     """
-    model, created = get_model_inst(model_class, row, *args, **kwargs)
+    model = model_class()
     for item in row:
         if cleaner:
             cleaned_value = cleaner.clean_value(row[item], item)

@@ -67,15 +67,6 @@ class TestMapper(TestCase):
         )
         self.assertEqual(modified_model.extra_data, expected_extra)
 
-    def test_map_row_missing_required_columns(self):
-        """Throw an exception when either required column is missing."""
-        # Row is missing `Property Id` and `Year Ending` columns.
-        fake_row = {u'heading1': u'value1'}
-        fake_model_class = FakeModel
-        self.assertRaises(mapper.MappingError, mapper.map_row, *(
-            fake_row, self.fake_mapping, fake_model_class,
-        ))
-
     def test_build_column_mapping(self):
         """Create a useful set of suggestions for mappings."""
         dyn_mapping = mapper.build_column_mapping(
