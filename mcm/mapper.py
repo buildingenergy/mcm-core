@@ -4,44 +4,6 @@ from mcm import matchers, utils
 from mcm.cleaners import default_cleaner
 
 
-class MappingError(Exception):
-    pass
-
-
-def get_model_inst(model_class, row, *args, **kwargs):
-    """Return a model instance given a class and some row data.
-
-    **Warning**
-    Implementation specific code in this function!
-
-    It relies on ``year_end`` and ``property_id``
-    to be an interger field on your model, and assumes that those
-    have a meta class that defines them as ``unique_together``
-
-    :param model_class: class, reference to model class in question.
-    :param row: dict, parsed dictionary from CSV.
-    :rtype: tuple, (model_inst, bool)
-
-    """
-    property_id = default_cleaner(row.get('Property Id'))
-    year_ending = utils.date_str_to_date(
-        default_cleaner(row.get('Year Ending'))
-    )
-    if not year_ending or not property_id:
-        raise MappingError('`Year Ending` or `Property Id` not defined')
-
-    get_or_create_criteria = {
-        'year_ending': year_ending,
-        'property_id': int(property_id),
-    }
-
-    extra_criteria = kwargs.get('extra_criteria')
-    if extra_criteria:
-        get_or_create_criteria.update(extra_criteria)
-
-    return model_class.objects.get_or_create(**get_or_create_criteria)
-
-
 def build_column_mapping(
     raw_columns, dest_columns, previous_mapping=None, map_args=None, thresh=None
     ):
@@ -97,7 +59,7 @@ def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
     :rtype: model_inst, with mapped data attributes; ready to save.
 
     """
-    model, created = get_model_inst(model_class, row, *args, **kwargs)
+    model = model_class()
     for item in row:
         if cleaner:
             cleaned_value = cleaner.clean_value(row[item], item)
