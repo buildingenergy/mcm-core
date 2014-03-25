@@ -35,6 +35,7 @@ def build_column_mapping(
             mapping = previous_mapping(dest, *args)
             if mapping:
                 result, conf = mapping
+                conf *= 100
 
         # Only enter this flow if we haven't already selected a result.
         if not result:
