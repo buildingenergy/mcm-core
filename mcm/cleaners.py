@@ -1,3 +1,4 @@
+import dateutil
 import re
 import string
 
@@ -27,7 +28,6 @@ def float_cleaner(value, *args):
         value = PUNCT_REGEX.sub('', value)
         value = float(value)
     except ValueError:
-
         return None
 
     return value
@@ -47,19 +47,37 @@ def bool_cleaner(value, *args):
     else:
         return False
 
+def date_cleaner(value, *args):
+    if not value:
+        return None
+    try:
+        dateutil.parser.parse(value)
+    except TypeError:
+        return None
+
+    return value
+
 
 class Cleaner(object):
     """Cleans values for a given ontology."""
     def __init__(self, ontology):
         self.ontology = ontology
-        self.schema = self.ontology['flat_schema']
-        self.float_columns = filter(lambda x: self.schema[x], self.schema)
+        self.schema = self.ontology.get(u'types', {})
+        self.float_columns = filter(
+            lambda x: self.schema[x] == u'float', self.schema
+        )
+        self.date_columns = filter(
+            lambda x: self.schema[x] == u'date', self.schema
+        )
 
     def clean_value(self, value, column_name):
         """Clean the value, based on characteristics of its column_name."""
         value = default_cleaner(value)
         if column_name in self.float_columns:
-            value = float_cleaner(value)
+            return float_cleaner(value)
+
+        if column_name in self.date_columns:
+            return date_cleaner(value)
 
         return value
 

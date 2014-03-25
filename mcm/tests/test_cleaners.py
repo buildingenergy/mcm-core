@@ -10,7 +10,11 @@ class TestCleaners(TestCase):
                 u'heading1': u'',
                 u'heading2': u'',
                 u'heading_data1': u'Some unit',
-             }
+             },
+            'types': {
+                'heading_data1': 'float',
+                'heading2': 'date'
+            }
         })
 
     def test_default_cleaner(self):
@@ -30,6 +34,12 @@ class TestCleaners(TestCase):
         self.assertEqual(cleaners.float_cleaner(u'12,090'), 12090)
         self.assertEqual(cleaners.float_cleaner(u'12,090 ?'), 12090)
 
+    def test_date_cleaner(self):
+        """We return the value if it's convertable to a python datetime."""
+        self.assertEqual(cleaners.date_cleaner(u'2/12/2012'), u'2/12/2012')
+        self.assertEqual(cleaners.date_cleaner(u''), None)
+        self.assertEqual(cleaners.date_cleaner(u'some string'), None)
+
     def test_clean_value(self):
         """Test that the ``Cleaner`` object properly routes cleaning."""
         expected = u'Whatever'
@@ -42,3 +52,6 @@ class TestCleaners(TestCase):
             self.cleaner.clean_value(u'0.7', u'heading_data1'),
             float_expected
         )
+
+        self.assertEqual(self.cleaner.date_columns, ['heading2'])
+        self.assertEqual(self.cleaner.float_columns, ['heading_data1'])
