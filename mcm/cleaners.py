@@ -1,3 +1,4 @@
+import dateutil
 import re
 import string
 
@@ -27,7 +28,6 @@ def float_cleaner(value, *args):
         value = PUNCT_REGEX.sub('', value)
         value = float(value)
     except ValueError:
-
         return None
 
     return value
@@ -46,6 +46,16 @@ def bool_cleaner(value, *args):
         return True
     else:
         return False
+
+def date_cleaner(value, *args):
+    if not value:
+        return None
+    try:
+        dateutil.parser.parse(value)
+    except TypeError:
+        return None
+
+    return value
 
 
 class Cleaner(object):
