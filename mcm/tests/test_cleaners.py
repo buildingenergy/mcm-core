@@ -10,7 +10,10 @@ class TestCleaners(TestCase):
                 u'heading1': u'',
                 u'heading2': u'',
                 u'heading_data1': u'Some unit',
-             }
+             },
+            'types': {
+                'heading_data1': 'float'
+            }
         })
 
     def test_default_cleaner(self):
