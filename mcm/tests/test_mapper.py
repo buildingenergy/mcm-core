@@ -1,6 +1,7 @@
 import copy
 from unittest import TestCase
 
+from mcm import cleaners
 from mcm import mapper
 from mcm.tests.utils import FakeModel
 
@@ -38,6 +39,12 @@ class TestMapper(TestCase):
         u'name': [u'Name', 100],
         u'address_line_1': [u'Address', 67]
     }
+
+    test_cleaning_schema = {'types': {
+        'property_id': 'float',
+    }}
+
+    test_cleaner = cleaners.Cleaner(test_cleaning_schema)
 
     def test_map_row(self):
         """Test the mapping between csv values and python objects."""
@@ -95,3 +102,23 @@ class TestMapper(TestCase):
         )
 
         self.assertDictEqual(dyn_mapping, expected)
+
+    def test_map_row_dynamic_mapping_with_cleaner(self):
+        """Run type-based cleaners on dynamic fields based on reverse-mapping"""
+        dyn_mapping = mapper.build_column_mapping(
+            self.raw_columns, self.dest_columns
+        )
+        fake_row = {
+            u'Property Id': u'234,235,423',
+            u'heading1': u'value1',
+        }
+        fake_model_class = FakeModel
+
+        modified_model = mapper.map_row(
+            fake_row,
+            self.fake_mapping,
+            fake_model_class,
+            cleaner=self.test_cleaner
+        )
+
+        self.assertEqual(modified_model.property_id, 234235423.0)
