@@ -60,9 +60,15 @@ def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
 
     """
     model = model_class()
+    # In case we need to look up cleaner by dynamic field mapping.
     for item in row:
+        column_name = item
         if cleaner:
-            cleaned_value = cleaner.clean_value(row[item], item)
+            if item not in (cleaner.float_columns or cleaner.date_columns):
+                # Try using a reverse mapping for dynamic maps
+                column_name = mapping[item]
+
+            cleaned_value = cleaner.clean_value(row[item], column_name)
         else:
             cleaned_value = default_cleaner(row[item])
         if item in mapping:
