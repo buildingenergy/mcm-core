@@ -65,8 +65,9 @@ def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
         column_name = item
         if cleaner:
             if item not in (cleaner.float_columns or cleaner.date_columns):
-                # Try using a reverse mapping for dynamic maps
-                column_name = mapping[item]
+                # Try using a reverse mapping for dynamic maps;
+                # default to row name if it's not mapped
+                column_name = mapping.get(item, column_name)
 
             cleaned_value = cleaner.clean_value(row[item], column_name)
         else:

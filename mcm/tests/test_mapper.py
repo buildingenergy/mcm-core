@@ -122,3 +122,22 @@ class TestMapper(TestCase):
         )
 
         self.assertEqual(modified_model.property_id, 234235423.0)
+
+    def test_map_row_handle_unmapped_columns(self):
+        """No KeyError when we check mappings for our column."""
+        test_mapping = copy.deepcopy(self.fake_mapping)
+        del(test_mapping[u'Property Id'])
+        fake_row = {
+            u'Property Id': u'234,235,423',
+            u'heading1': u'value1',
+        }
+        fake_model_class = FakeModel
+        modified_model = mapper.map_row(
+            fake_row,
+            test_mapping,
+            fake_model_class,
+            cleaner=self.test_cleaner
+        )
+
+        self.assertEqual(getattr(modified_model, 'property_id', None), None)
+        self.assertEqual(getattr(modified_model, 'heading_1'), u'value1')
