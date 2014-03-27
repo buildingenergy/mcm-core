@@ -17,34 +17,34 @@ def build_column_mapping(
         Example:
         ``
         # The expectation is that our callable always gets passed a
-        # dest key. If it finds a match, it returns the raw_column and score.
+        # raw key. If it finds a match, it returns the raw_column and score.
         previous_mapping('example field', *map_args) ->
-            ('Field1', 0.93)
+            ('field_1', 0.93)
         ``
 
-    :returns dict: {'dest_column': [('raw_column', score)...],...}
+    :returns dict: {'raw_column': [('dest_column', score)...],...}
 
     """
     probable_mapping = {}
     thresh = thresh or 0
-    for dest in dest_columns:
+    for raw in raw_columns:
         result = []
         # We want previous mappings to be at the top of the list.
         if previous_mapping and callable(previous_mapping):
             args = map_args or []
-            mapping = previous_mapping(dest, *args)
+            mapping = previous_mapping(raw, *args)
             if mapping:
                 result, conf = mapping
 
         # Only enter this flow if we haven't already selected a result.
         if not result:
             best_match, conf  = matchers.best_match(
-                dest, raw_columns, top_n=1
+                raw, dest_columns, top_n=1
             )[0]
             if conf > thresh:
                 result = best_match
 
-        probable_mapping[dest] = [result, conf]
+        probable_mapping[raw] = [result, conf]
 
     return probable_mapping
 
