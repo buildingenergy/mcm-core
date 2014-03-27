@@ -17,12 +17,12 @@ def build_column_mapping(
         Example:
         ``
         # The expectation is that our callable always gets passed a
-        # dest key. If it finds a match, it returns the raw_column and score.
+        # raw key. If it finds a match, it returns the raw_column and score.
         previous_mapping('example field', *map_args) ->
-            ('Field1', 0.93)
+            ('field_1', 0.93)
         ``
 
-    :returns dict: {'dest_column': [('raw_column', score)...],...}
+    :returns dict: {'raw_column': [('dest_column', score)...],...}
 
     """
     probable_mapping = {}
