@@ -32,12 +32,13 @@ class TestMapper(TestCase):
         u'custom_id_1'
     ]
 
-    expected ={
-        u'custom_id_1': [u'Building ID', 27],
-        u'city': [u'City', 100],
-        u'tax_lot_id': [u'Building ID', 29],
-        u'name': [u'Name', 100],
-        u'address_line_1': [u'Address', 67]
+
+    expected = {
+        u'Address': [u'address_line_1', 67],
+        u'BBL': [u'tax_lot_id', 15],
+        u'Building ID': [u'tax_lot_id', 29],
+        u'City': [u'city', 100],
+        u'Name': [u'name', 100]
     }
 
     test_cleaning_schema = {'types': {
@@ -87,13 +88,13 @@ class TestMapper(TestCase):
 
         expected = copy.deepcopy(self.expected)
         # This should be the result of our "previous_mapping" call.
-        expected['custom_id_1'] = [u'Tax ID', 27]
+        expected[u'Building ID'] = [u'custom_id_1', 27]
 
         # Here we pretend that we're doing a query and returning
         # relevant results.
-        def get_mapping(dest, *args, **kwargs):
-            if dest == u'custom_id_1':
-                return [u'Tax ID', 27]
+        def get_mapping(raw, *args, **kwargs):
+            if raw == u'Building ID':
+                return [u'custom_id_1', 27]
 
         dyn_mapping = mapper.build_column_mapping(
             self.raw_columns,
