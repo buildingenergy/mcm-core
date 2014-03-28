@@ -37,7 +37,7 @@ def build_column_mapping(
                 result, conf = mapping
 
         # Only enter this flow if we haven't already selected a result.
-        if not result:
+        if not result and result is not None:
             best_match, conf  = matchers.best_match(
                 raw, dest_columns, top_n=1
             )[0]
