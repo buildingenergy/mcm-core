@@ -21,7 +21,6 @@ MAP = {
     u'City': u'city',
     u'Custom Property ID 1 - ID': u'custom_id_1',
     u'Postal Code': u'postal_code',
-    u'Organization': u'organization',
     u'State/Province': u'state_province',
     u'Property Floor Area (Buildings and Parking) (ft2)': (
         u'property_floor_area_bldg_park'
