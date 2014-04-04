@@ -22,8 +22,8 @@ class TestCSVParser(TestCase):
 
     def test_clean_super(self):
        """Make sure we clean out unicode escaped super scripts."""
-       expected = u'Testing 2. And 2. And 2'
-       test = u'Testing \xb2. And \ufffd. And _'
+       expected = u'Testing 2. And 2.'
+       test = u'Testing \xb2. And \ufffd.'
        self.assertEqual(
             self.parser._clean_super(test),
             expected

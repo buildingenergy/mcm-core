@@ -16,7 +16,7 @@ elsewhere.
 
 class CSVParser(object):
     # Character escape sequences to replace
-    CLEAN_SUPER = [u'\ufffd', u'\xb2', u'_']
+    CLEAN_SUPER = [u'\ufffd', u'\xb2']
 
     def __init__(self, csvfile, *args, **kwargs):
         self.csvfile = csvfile
