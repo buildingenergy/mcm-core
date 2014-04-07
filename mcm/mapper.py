@@ -29,6 +29,7 @@ def build_column_mapping(
     thresh = thresh or 0
     for raw in raw_columns:
         result = []
+        conf = 0
         # We want previous mappings to be at the top of the list.
         if previous_mapping and callable(previous_mapping):
             args = map_args or []
@@ -43,6 +44,9 @@ def build_column_mapping(
             )[0]
             if conf > thresh:
                 result = best_match
+            else:
+                result = None
+                conf = 0
 
         probable_mapping[raw] = [result, conf]
 

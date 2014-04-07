@@ -85,7 +85,6 @@ class TestMapper(TestCase):
 
     def test_build_column_mapping_w_callable(self):
         """Callable result at the begining of the list."""
-
         expected = copy.deepcopy(self.expected)
         # This should be the result of our "previous_mapping" call.
         expected[u'Building ID'] = [u'custom_id_1', 27]
@@ -103,6 +102,42 @@ class TestMapper(TestCase):
         )
 
         self.assertDictEqual(dyn_mapping, expected)
+
+    def test_build_column_mapping_w_null_saved(self):
+        """We handle explicit saves of null, and return those dutifully."""
+        expected = copy.deepcopy(self.expected)
+        # This should be the result of our "previous_mapping" call.
+        expected[u'Building ID'] = [None, 1]
+
+        # Here we pretend that we're doing a query and returning
+        # relevant results.
+        def get_mapping(raw, *args, **kwargs):
+            if raw == u'Building ID':
+                return [None, 1]
+
+        dyn_mapping = mapper.build_column_mapping(
+            self.raw_columns,
+            self.dest_columns,
+            previous_mapping=get_mapping,
+        )
+
+        self.assertDictEqual(dyn_mapping, expected)
+
+    def test_build_column_mapping_w_no_match(self):
+        """We return None if there's no good match."""
+        expected = copy.deepcopy(self.expected)
+        # This should be the result of our "previous_mapping" call.
+        null_result = [None, 0]
+        expected[u'BBL'] = null_result
+
+        dyn_mapping = mapper.build_column_mapping(
+            self.raw_columns,
+            self.dest_columns,
+            thresh=28
+        )
+
+        self.assertDictEqual(dyn_mapping, expected)
+
 
     def test_map_row_dynamic_mapping_with_cleaner(self):
         """Run type-based cleaners on dynamic fields based on reverse-mapping"""
