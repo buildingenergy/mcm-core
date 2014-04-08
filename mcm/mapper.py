@@ -57,7 +57,7 @@ def apply_initial_data(model, initial_data):
     """Set any attributes that are passed in as initial data.
 
     :param model: instance of your state tracking object.
-    :initial_data: dict, keys should line up with attributes on model.
+    :param initial_data: dict, keys should line up with attributes on model.
     :rtype: model instance, modified.
 
     """
