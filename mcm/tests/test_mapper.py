@@ -177,3 +177,28 @@ class TestMapper(TestCase):
 
         self.assertEqual(getattr(modified_model, 'property_id', None), None)
         self.assertEqual(getattr(modified_model, 'heading_1'), u'value1')
+
+    def test_map_row_w_initial_data(self):
+        """Make sure that we apply initial data before mapping."""
+        test_mapping = copy.deepcopy(self.fake_mapping)
+        initial_data = {'property_name': 'Example'}
+        fake_row = {
+            u'Property Id': u'234,235,423',
+            u'heading1': u'value1',
+        }
+        fake_model_class = FakeModel
+        modified_model = mapper.map_row(
+            fake_row,
+            test_mapping,
+            fake_model_class,
+            cleaner=self.test_cleaner,
+            initial_data=initial_data
+        )
+
+        # Our data is set by initial_data
+        self.assertEqual(
+            getattr(modified_model, 'property_name', None), 'Example'
+        )
+        # Even though we have no explicit mapping for it.
+        self.assertTrue('property_name' not in test_mapping)
+

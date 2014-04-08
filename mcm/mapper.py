@@ -53,6 +53,26 @@ def build_column_mapping(
     return probable_mapping
 
 
+def apply_initial_data(model, initial_data):
+    """Set any attributes that are passed in as initial data.
+
+    :param model: instance of your state tracking object.
+    :initial_data: dict, keys should line up with attributes on model.
+    :rtype: model instance, modified.
+
+    """
+    for item in initial_data:
+        value = initial_data[item]
+        if hasattr(model, item):
+            setattr(model, item, value)
+        elif (
+            hasattr(model, 'extra_data') and isinstance(model.extra_data, dict)
+        ):
+            model.extra_data[item] = value
+
+    return model
+
+
 def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
     """Apply mapping of row data to model.
 
@@ -63,7 +83,12 @@ def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
     :rtype: model_inst, with mapped data attributes; ready to save.
 
     """
+    initial_data = kwargs.get('initial_data', None)
     model = model_class()
+    # If there are any initial states we need to set prior to mapping.
+    if initial_data:
+        model = apply_initial_data(model, initial_data)
+
     # In case we need to look up cleaner by dynamic field mapping.
     for item in row:
         column_name = item
