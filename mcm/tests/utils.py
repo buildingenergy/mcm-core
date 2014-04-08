@@ -16,6 +16,7 @@ class FakeManager(object):
 
 class FakeModel(object):
     """Used for testing purposes, only."""
+    property_name = ''
     objects = FakeManager()
 
     def save(self):
