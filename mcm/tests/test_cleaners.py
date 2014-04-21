@@ -39,6 +39,7 @@ class TestCleaners(TestCase):
         self.assertEqual(cleaners.date_cleaner(u'2/12/2012'), u'2/12/2012')
         self.assertEqual(cleaners.date_cleaner(u''), None)
         self.assertEqual(cleaners.date_cleaner(u'some string'), None)
+        self.assertEqual(cleaners.date_cleaner(99), None)
 
     def test_clean_value(self):
         """Test that the ``Cleaner`` object properly routes cleaning."""
