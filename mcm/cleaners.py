@@ -47,12 +47,13 @@ def bool_cleaner(value, *args):
     else:
         return False
 
+
 def date_cleaner(value, *args):
     if not value:
         return None
     try:
         dateutil.parser.parse(value)
-    except TypeError:
+    except (TypeError, ValueError):
         return None
 
     return value
