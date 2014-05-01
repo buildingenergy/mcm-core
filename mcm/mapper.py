@@ -75,7 +75,9 @@ def apply_initial_data(model, initial_data):
 
 def _concat_values(concat_columns, column_values, delimiter):
     # Use the order of values that we got from concat_columns def.
-    values = [column_values[item] for item in concat_columns]
+    values = [
+        column_values[item] for item in concat_columns if item in column_values
+    ]
     return delimiter.join(values)
 
 
@@ -123,8 +125,8 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
 
     concat = concat or {}
     concat_values = {}
-    delimiter = concat.get('delimiter', '')
-    target = concat.get('target', None)
+    delimiter = concat.get('delimiter', ' ')
+    target = concat.get('target', '__broken_target__')
     concat_columns = concat.get('concat_columns', [])
 
     # In case we need to look up cleaner by dynamic field mapping.
@@ -138,9 +140,10 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
     if concat_values:
         # We've skipped mapping any columns which we're going to concat.
         # Now we concatenate them all and save to their designated target.
+        mapping[target] = target # We add our target into the map so it sets
         model = apply_column_value(
             target,
-            _concat_values(concat_columns, concat_values),
+            _concat_values(concat_columns, concat_values, delimiter),
             model,
             mapping,
             cleaner

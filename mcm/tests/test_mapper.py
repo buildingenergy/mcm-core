@@ -202,3 +202,108 @@ class TestMapper(TestCase):
         # Even though we have no explicit mapping for it.
         self.assertTrue('property_name' not in test_mapping)
 
+    def test_map_row_w_concat(self):
+        """Make sure that concatenation works."""
+        test_mapping = copy.deepcopy(self.fake_mapping)
+        concat = {
+            'target': 'address_1',
+            # Reconstruct in this precise order.
+            'concat_columns': ['street number', 'quadrant', 'street name']
+            # No need to specify a delimier here, our default is a space.
+        }
+
+        fake_row = {
+            u'street number': u'1232',
+            u'street name': u'Fanfare St.',
+            u'quadrant': u'NE',
+        }
+
+        modified_model = mapper.map_row(
+                fake_row,
+                test_mapping,
+                FakeModel,
+                concat=concat
+        )
+
+        # Note: address_1 mapping was dynamicall defined by the concat
+        # config.
+        self.assertEqual(modified_model.address_1, u'1232 NE Fanfare St.')
+
+    def test_map_row_w_concat_and_delimiter(self):
+        """Make sure we honor the delimiter."""
+        concat = {
+            'target': 'address_1',
+            # Reconstruct in this precise order.
+            'concat_columns': ['street number', 'quadrant', 'street name'],
+            # No need to specify a delimier here, our default is a space.
+            'delimiter': '/',
+        }
+        fake_row = {
+            u'street number': u'1232',
+            u'street name': u'Fanfare St.',
+            u'quadrant': u'NE',
+        }
+
+        modified_model = mapper.map_row(
+                fake_row,
+                self.fake_mapping,
+                FakeModel,
+                concat=concat
+        )
+
+        self.assertEqual(modified_model.address_1, u'1232/NE/Fanfare St.')
+
+    def test_map_row_w_bad_concat_config(self):
+        """Test expected behavior with bad concat config data."""
+        fake_row = {
+            u'street number': u'1232',
+            u'Property Id': u'23423423',
+            u'street name': u'Fanfare St.',
+            u'quadrant': u'NE',
+        }
+
+        # No target defined.
+        bad_concat1 = {
+            'concat_columns': ['street number', 'quadrant', 'street name'],
+        }
+
+        modified_model = mapper.map_row(
+            fake_row,
+            self.fake_mapping,
+            FakeModel,
+            concat=bad_concat1
+        )
+
+        expected = u'1232 NE Fanfare St.'
+        # We default to saving it to an attribute that won't get serialized.
+        self.assertEqual(modified_model.__broken_target__, expected)
+
+        # Now with target, but including unknown column headers.
+        bad_concat2 = {
+            'concat_columns': ['face', 'thing', 'street number', 'quadrant'],
+            'target': 'address_1',
+        }
+
+        modified_model = mapper.map_row(
+            fake_row,
+            self.fake_mapping,
+            FakeModel,
+            concat=bad_concat2
+        )
+
+        # All of our non-sense headers were simply ignored.
+        self.assertEqual(modified_model.address_1, u'1232 NE')
+
+        bad_concat2 = {
+            'target': 'address_1'
+        }
+
+        modified_model = mapper.map_row(
+            fake_row,
+            self.fake_mapping,
+            FakeModel,
+            concat=bad_concat2
+        )
+
+        # If we don't specify any columns to concatenate, do nothing
+        self.assertEqual(getattr(modified_model, 'address_1', None), None)
