@@ -343,6 +343,5 @@ class TestMapper(TestCase):
 
         st_expected = u'1232 NE Fanfare St.'
         sale_expected = u'01/23/2012'
-        # We default to saving it to an attribute that won't get serialized.
         self.assertEqual(modified_model.address1, st_expected)
         self.assertEqual(modified_model.sale_date, sale_expected)
