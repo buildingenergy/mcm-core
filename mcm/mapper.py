@@ -74,6 +74,7 @@ def apply_initial_data(model, initial_data):
 
 
 def _concat_values(concat_columns, column_values, delimiter):
+    """Concatenate the values into one string to set for target."""
     # Use the order of values that we got from concat_columns def.
     values = [
         column_values[item] for item in concat_columns if item in column_values
