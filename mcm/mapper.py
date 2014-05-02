@@ -115,6 +115,18 @@ def apply_column_value(item, value, model, mapping, cleaner):
     return model
 
 
+def _set_default_concat_config(concat):
+    """Go through the list of dictionaries and setup their keys."""
+    concat = concat or []
+    for c in concat:
+        c['target'] = c.get('target', '__broken_target__')
+        c['concat_columns'] = c.get('concat_columns', [])
+        c['delmiter'] = c.get('delimiter', ' ')
+        c['concat_values'] = {}
+
+    return concat
+
+
 def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
     """Apply mapping of row data to model.
 
@@ -122,6 +134,8 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
     :param mapping: dict, keys map row columns to model_class attrs.
     :param model_class: class, reference to model class we map against.
     :param cleaner: (optional) inst, cleaner instance for row values.
+    :param concat: (optional) list of dict,
+        config for concatenating rows into an attr.
     :rtype: model_inst, with mapped data attributes; ready to save.
 
     """
@@ -131,31 +145,34 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
     if initial_data:
         model = apply_initial_data(model, initial_data)
 
-    concat = concat or {}
-    concat_values = {}
-    delimiter = concat.get('delimiter', ' ')
-    target = concat.get('target', '__broken_target__')
-    concat_columns = concat.get('concat_columns', [])
+    concat = _set_default_concat_config(concat)
 
     # In case we need to look up cleaner by dynamic field mapping.
     for item, value in row.items():
-        if item in concat_columns:
-            concat_values[item] = value
-            continue
+        # Look through any of our concatenation configs to see if this row
+        # needs to be set aside for mergning with others at the end of the map.
+        for concat_column in concat:
+            if item in concat_column['concat_columns']:
+                concat_column['concat_values'][item] = value
+                continue
 
         model = apply_column_value(item, value,  model, mapping, cleaner)
 
-    if concat_values:
+    # Did we stash any column values away due to concatenation?
+    if {c['concat_values'] for c in concat}:
         # We've skipped mapping any columns which we're going to concat.
         # Now we concatenate them all and save to their designated target.
-        mapping[target] = target # We add our target into the map so it sets
-        model = apply_column_value(
-            target,
-            _concat_values(concat_columns, concat_values, delimiter),
-            model,
-            mapping,
-            cleaner
-        )
+        for c in concat:
+            mapping[target] = c['target'] 
+            model = apply_column_value(
+                c['target'],
+                _concat_values(
+                    c['concat_columns'], c['concat_values'], c['delimiter']
+                ),
+                model,
+                mapping,
+                cleaner
+            )
 
     return model
 
