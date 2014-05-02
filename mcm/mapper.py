@@ -73,13 +73,95 @@ def apply_initial_data(model, initial_data):
     return model
 
 
-def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
+def _concat_values(concat_columns, column_values, delimiter):
+    """Concatenate the values into one string to set for target."""
+    # Use the order of values that we got from concat_columns def.
+    values = [
+        column_values[item] for item in concat_columns if item in column_values
+    ]
+    return delimiter.join(values) or None
+
+
+def apply_column_value(item, value, model, mapping, cleaner):
+    """Set the column value as the target attr on our model.
+    
+    :param item: str, the column name as the mapping understands it. 
+    :param value: dict, the value of that column for a given row.
+    :param model: inst, the object we're mapping data to.
+    :param mapping: dict, the mapping of row data to attribute data.
+    :param cleaner: runnable, something to clean data values.
+    :rtype: model inst
+    
+    """
+    column_name = item
+    if cleaner:
+        if item not in (cleaner.float_columns or cleaner.date_columns):
+            # Try using a reverse mapping for dynamic maps;
+            # default to row name if it's not mapped
+            column_name = mapping.get(item, column_name)
+
+        cleaned_value = cleaner.clean_value(value, column_name)
+    else:
+        cleaned_value = default_cleaner(value)
+    if item in mapping:
+        setattr(model, mapping.get(item), cleaned_value)
+    elif hasattr(model, 'extra_data'):
+        if not isinstance(model.extra_data, dict):
+            # sometimes our dict is returned as JSON string.
+            # TODO: Need to resolve this upstream with djorm-ext-jsonfield.
+            model.extra_data = json.loads(model.extra_data)
+        model.extra_data[item] = cleaned_value
+    else:
+        model.extra_data = {item: cleaned_value}
+
+    return model
+
+
+def _set_default_concat_config(concat):
+    """Go through the list of dictionaries and setup their keys."""
+    concat = concat or []
+    if not isinstance(concat, list):
+        concat = [concat]
+    for c in concat:
+        c['target'] = c.get('target', '__broken_target__')
+        c['concat_columns'] = c.get('concat_columns', [])
+        c['delimiter'] = c.get('delimiter', ' ')
+        c['concat_values'] = {}
+
+    return concat
+
+
+def _concatenate_columns(model, mapping, concat, cleaner):
+    """If we have concatenation configs, concat those values into target."""
+    if concat and [c['concat_values'] for c in concat]:
+        # We've skipped mapping any columns which we're going to concat.
+        # Now we concatenate them all and save to their designated target.
+        for c in concat:
+            mapping[c['target']] = c['target']
+            model = apply_column_value(
+                c['target'],
+                _concat_values(
+                    c['concat_columns'],
+                    c['concat_values'],
+                    c['delimiter']
+                ),
+                model,
+                mapping,
+                cleaner
+            )
+
+    return model
+
+
+def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
     """Apply mapping of row data to model.
 
     :param row: dict, parsed row data from csv.
     :param mapping: dict, keys map row columns to model_class attrs.
     :param model_class: class, reference to model class we map against.
     :param cleaner: (optional) inst, cleaner instance for row values.
+    :param concat: (optional) list of dict,
+        config for concatenating rows into an attr.
     :rtype: model_inst, with mapped data attributes; ready to save.
 
     """
@@ -89,28 +171,20 @@ def map_row(row, mapping, model_class, cleaner=None, *args, **kwargs):
     if initial_data:
         model = apply_initial_data(model, initial_data)
 
+    concat = _set_default_concat_config(concat)
+
     # In case we need to look up cleaner by dynamic field mapping.
-    for item in row:
-        column_name = item
-        if cleaner:
-            if item not in (cleaner.float_columns or cleaner.date_columns):
-                # Try using a reverse mapping for dynamic maps;
-                # default to row name if it's not mapped
-                column_name = mapping.get(item, column_name)
+    for item, value in row.items():
+        # Look through any of our concatenation configs to see if this row
+        # needs to be set aside for mergning with others at the end of the map.
+        for concat_column in concat:
+            if item in concat_column['concat_columns']:
+                concat_column['concat_values'][item] = value
+                continue
 
-            cleaned_value = cleaner.clean_value(row[item], column_name)
-        else:
-            cleaned_value = default_cleaner(row[item])
-        if item in mapping:
-            setattr(model, mapping.get(item), cleaned_value)
-        elif hasattr(model, 'extra_data'):
-            if not isinstance(model.extra_data, dict):
-                # sometimes our dict is returned as JSON string.
-                # TODO: Need to resolve this upstream with djorm-ext-jsonfield.
-                model.extra_data = json.loads(model.extra_data)
-            model.extra_data[item] = cleaned_value
-        else:
-            model.extra_data = {item: cleaned_value}
+        model = apply_column_value(item, value,  model, mapping, cleaner)
 
-    return model
+    # Noop if there aren't any concatenation configs.
+    return _concatenate_columns(model, mapping, concat, cleaner)
+
 
