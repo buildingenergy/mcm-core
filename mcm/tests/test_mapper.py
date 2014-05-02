@@ -32,7 +32,6 @@ class TestMapper(TestCase):
         u'custom_id_1'
     ]
 
-
     expected = {
         u'Address': [u'address_line_1', 67],
         u'BBL': [u'tax_lot_id', 15],
@@ -307,3 +306,43 @@ class TestMapper(TestCase):
 
         # If we don't specify any columns to concatenate, do nothing
         self.assertEqual(getattr(modified_model, 'address_1', None), None)
+
+    def test_concat_multiple_targets(self):
+        """Make sure we're able to create multiple concatenation targets."""
+        fake_row = {
+            u'street number': u'1232',
+            u'Property Id': u'23423423',
+            u'street name': u'Fanfare St.',
+            u'quadrant': u'NE',
+            u'sale_month': '01',
+            u'sale_day': '23',
+            u'sale_year': '2012',
+        }
+
+        # No target defined.
+        concat = [
+            # For our street data.
+            {
+                'target': 'address1',
+                'concat_columns': ['street number', 'quadrant', 'street name'],
+            },
+            # For our sale data.
+            {
+                'target': 'sale_date',
+                'concat_columns': ['sale_month', 'sale_day', 'sale_year'],
+                'delimiter': '/'
+            }
+        ]
+
+        modified_model = mapper.map_row(
+            fake_row,
+            self.fake_mapping,
+            FakeModel,
+            concat=concat
+        )
+
+        st_expected = u'1232 NE Fanfare St.'
+        sale_expected = u'01/23/2012'
+        # We default to saving it to an attribute that won't get serialized.
+        self.assertEqual(modified_model.address1, st_expected)
+        self.assertEqual(modified_model.sale_date, sale_expected)

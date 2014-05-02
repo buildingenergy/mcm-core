@@ -78,7 +78,7 @@ def _concat_values(concat_columns, column_values, delimiter):
     values = [
         column_values[item] for item in concat_columns if item in column_values
     ]
-    return delimiter.join(values)
+    return delimiter.join(values) or None
 
 
 def apply_column_value(item, value, model, mapping, cleaner):
@@ -118,13 +118,37 @@ def apply_column_value(item, value, model, mapping, cleaner):
 def _set_default_concat_config(concat):
     """Go through the list of dictionaries and setup their keys."""
     concat = concat or []
+    if not isinstance(concat, list):
+        concat = [concat]
     for c in concat:
         c['target'] = c.get('target', '__broken_target__')
         c['concat_columns'] = c.get('concat_columns', [])
-        c['delmiter'] = c.get('delimiter', ' ')
+        c['delimiter'] = c.get('delimiter', ' ')
         c['concat_values'] = {}
 
     return concat
+
+
+def _concatenate_columns(model, mapping, concat, cleaner):
+    """If we have concatenation configs, concat those values into target."""
+    if concat and [c['concat_values'] for c in concat]:
+        # We've skipped mapping any columns which we're going to concat.
+        # Now we concatenate them all and save to their designated target.
+        for c in concat:
+            mapping[c['target']] = c['target']
+            model = apply_column_value(
+                c['target'],
+                _concat_values(
+                    c['concat_columns'],
+                    c['concat_values'],
+                    c['delimiter']
+                ),
+                model,
+                mapping,
+                cleaner
+            )
+
+    return model
 
 
 def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
@@ -158,21 +182,7 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
 
         model = apply_column_value(item, value,  model, mapping, cleaner)
 
-    # Did we stash any column values away due to concatenation?
-    if {c['concat_values'] for c in concat}:
-        # We've skipped mapping any columns which we're going to concat.
-        # Now we concatenate them all and save to their designated target.
-        for c in concat:
-            mapping[target] = c['target'] 
-            model = apply_column_value(
-                c['target'],
-                _concat_values(
-                    c['concat_columns'], c['concat_values'], c['delimiter']
-                ),
-                model,
-                mapping,
-                cleaner
-            )
+    # Noop if there aren't any concatenation configs.
+    return _concatenate_columns(model, mapping, concat, cleaner)
 
-    return model
 
