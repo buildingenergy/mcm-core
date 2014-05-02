@@ -224,7 +224,7 @@ class TestMapper(TestCase):
                 concat=concat
         )
 
-        # Note: address_1 mapping was dynamicall defined by the concat
+        # Note: address_1 mapping was dynamically defined by the concat
         # config.
         self.assertEqual(modified_model.address_1, u'1232 NE Fanfare St.')
 
