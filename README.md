@@ -4,15 +4,9 @@ mcm-core
 Core MCM - Map Clean Merge
 
 
-Installing
-----------
 
-Once it's hosted on Pypi:
-```bash
-    pip install mcm-core
-```
 
-Integration
+Overview
 -----------
 
 MCM has two main peices, a reader and a mapper.
@@ -29,6 +23,34 @@ MCM has two main peices, a reader and a mapper.
     * If you always need to set some information in the object that you're mapping data into, this is useful.
   * Concatenate rows together with a specified delimiter character.
   * Data which doesn't match a given schema's mapping is still saved. It's put in a dictionary called ``extra_data``.
+
+  
+Installing
+----------
+
+Once it's hosted on Pypi:
+```bash
+    pip install mcm-core
+```
+
+Integration
+-----------
+
+```python
+from mcm import cleaners, mapper, reader
+
+# Here our mapping is just a dictionary where our keys are raw data representations
+# and our values are our normalized attributes that we're mapping to.
+mapping = {'Thing': 'thing_1', 'Other thing': 'thing_2'}
+
+# model_class can be any type of object.
+model_class = object
+
+# Reading and mapping from a CSV file, simple case.
+parser = reader.MCMParser(csv_file_handle)
+mapped_objs = [m for m in parser.map_rows(mapping, model_class)]
+```
+
 
 Developing
 ----------
