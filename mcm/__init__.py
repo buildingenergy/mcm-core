@@ -1,4 +1,4 @@
-VERSION = (0, 1)
+VERSION = (0, 0, 1)
 
 """
 This is the Map, Clean, Merge application for Building Energy Inc.
