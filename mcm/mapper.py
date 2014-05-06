@@ -84,14 +84,14 @@ def _concat_values(concat_columns, column_values, delimiter):
 
 def apply_column_value(item, value, model, mapping, cleaner):
     """Set the column value as the target attr on our model.
-    
-    :param item: str, the column name as the mapping understands it. 
+
+    :param item: str, the column name as the mapping understands it.
     :param value: dict, the value of that column for a given row.
     :param model: inst, the object we're mapping data to.
     :param mapping: dict, the mapping of row data to attribute data.
     :param cleaner: runnable, something to clean data values.
     :rtype: model inst
-    
+
     """
     column_name = item
     if cleaner:
