@@ -1,3 +1,7 @@
+"""
+:copyright: (c) 2014 Building Energy Inc
+:license: Apache v2, see LICENSE for more details.
+"""
 schema = {u'flat_schema': {
     u'Address 1': u'',
     u'Address 2': u'',
