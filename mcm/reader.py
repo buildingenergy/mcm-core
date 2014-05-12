@@ -1,6 +1,12 @@
 """
 :copyright: (c) 2014 Building Energy Inc
 :license: Apache v2, see LICENSE for more details.
+
+
+The Reader module is intended to contain only code which reads data
+out of CSV files. Fuzzy matches, application to data models happens
+elsewhere.
+
 """
 import json
 import operator
@@ -11,11 +17,6 @@ from unicodecsv import DictReader, Sniffer
 from mcm import cleaners, mapper, matchers, utils
 
 
-""" The Reader module is intended to contain only code which reads data
-out of CSV files. Fuzzy matches, application to data models happens
-elsewhere.
-
-"""
 
 
 class CSVParser(object):
