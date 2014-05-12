@@ -15,7 +15,10 @@ setup(
     include_package_data=True,
     package_data = { '': ['README.md'] },
     install_requires=[
+        'fuzzywuzzy',
         'nose',
+        'python-dateutil',
+        'unicodecsv'
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
