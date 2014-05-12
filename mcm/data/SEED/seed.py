@@ -1,3 +1,7 @@
+"""
+:copyright: (c) 2014 Building Energy Inc
+:license: Apache v2, see LICENSE for more details.
+"""
 schema = {u'types': {
     u'address_line_1': u'',
     u'address_line_2': u'',

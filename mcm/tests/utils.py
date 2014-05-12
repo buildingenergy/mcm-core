@@ -1,3 +1,7 @@
+"""
+:copyright: (c) 2014 Building Energy Inc
+:license: Apache v2, see LICENSE for more details.
+"""
 def list_has_substring(substring, l):
     """Return True if substring occurs in list l."""
     found_substring = False
