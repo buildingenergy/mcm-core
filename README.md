@@ -30,7 +30,7 @@ Installing
 
 Once it's hosted on Pypi:
 ```bash
-    pip install mcm-core
+    pip install mcm
 ```
 
 Integration
