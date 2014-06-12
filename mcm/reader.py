@@ -29,7 +29,7 @@ class CSVParser(object):
 
     def _get_csv_reader(self, *args, **kwargs):
         """Guess CSV dialect, and return CSV reader."""
-        dialect = Sniffer().sniff(self.csvfile.read(1024))
+        dialect = Sniffer().sniff(self.csvfile.read(4096))
         self.csvfile.seek(0)
 
         if not 'reader_type' in kwargs:
