@@ -17,8 +17,6 @@ from unicodecsv import DictReader, Sniffer
 from mcm import cleaners, mapper, matchers, utils
 
 
-
-
 class CSVParser(object):
     # Character escape sequences to replace
     CLEAN_SUPER = [u'\ufffd', u'\xb2']
@@ -29,7 +27,13 @@ class CSVParser(object):
 
     def _get_csv_reader(self, *args, **kwargs):
         """Guess CSV dialect, and return CSV reader."""
-        dialect = Sniffer().sniff(self.csvfile.read(4096))
+        #Skip the first line, as csv headers are more likely to have weird
+        #character distributions than the actual data.
+        self.csvfile.readline()
+
+        #Read a significant chunk of the data to improve the odds of
+        #determining the dialect.  MCM is often run on very wide csv files.
+        dialect = Sniffer().sniff(self.csvfile.read(16384))
         self.csvfile.seek(0)
 
         if not 'reader_type' in kwargs:
@@ -91,7 +95,6 @@ class MCMParser(CSVParser):
 
         else:
             self.matching_func = kwargs.get('matching_func')
-
 
     def split_rows(self, chunk_size, callback, *args, **kwargs):
         """Break up the CSV into smaller pieces for parallel processing."""
