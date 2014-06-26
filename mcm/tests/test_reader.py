@@ -2,7 +2,7 @@
 :copyright: (c) 2014 Building Energy Inc
 :license: Apache v2, see LICENSE for more details.
 """
-from unittest import TestCase, skip
+from unittest import TestCase
 
 import unicodecsv
 
@@ -25,17 +25,17 @@ class TestCSVParser(TestCase):
         )
 
     def test_clean_super(self):
-       """Make sure we clean out unicode escaped super scripts."""
-       expected = u'Testing 2. And 2.'
-       test = u'Testing \xb2. And \ufffd.'
-       self.assertEqual(
+        """Make sure we clean out unicode escaped super scripts."""
+        expected = u'Testing 2. And 2.'
+        test = u'Testing \xb2. And \ufffd.'
+        self.assertEqual(
             self.parser._clean_super(test),
             expected
         )
 
-       # Test that our replace keyword works
-       new_expected = expected.replace('2', '3')
-       self.assertEqual(
+        # Test that our replace keyword works
+        new_expected = expected.replace('2', '3')
+        self.assertEqual(
             self.parser._clean_super(test, replace=u'3'),
             new_expected
         )
@@ -82,7 +82,6 @@ class TestMCMParser(TestCase):
         # the last one in its own.
         self.assertEqual(self.total_callbacks, 2)
         self.assertEqual(num_rows, 3)
-
 
     def test_split_rows_w_large_batch(self):
         self.parser.split_rows(5000, self.my_callback)

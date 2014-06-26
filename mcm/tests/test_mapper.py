@@ -141,10 +141,9 @@ class TestMapper(TestCase):
 
         self.assertDictEqual(dyn_mapping, expected)
 
-
     def test_map_row_dynamic_mapping_with_cleaner(self):
-        """Run type-based cleaners on dynamic fields based on reverse-mapping"""
-        dyn_mapping = mapper.build_column_mapping(
+        """Type-based cleaners on dynamic fields based on reverse-mapping."""
+        mapper.build_column_mapping(
             self.raw_columns, self.dest_columns
         )
         fake_row = {
@@ -222,10 +221,10 @@ class TestMapper(TestCase):
         }
 
         modified_model = mapper.map_row(
-                fake_row,
-                test_mapping,
-                FakeModel,
-                concat=concat
+            fake_row,
+            test_mapping,
+            FakeModel,
+            concat=concat
         )
 
         # Note: address_1 mapping was dynamically defined by the concat
@@ -248,10 +247,10 @@ class TestMapper(TestCase):
         }
 
         modified_model = mapper.map_row(
-                fake_row,
-                self.fake_mapping,
-                FakeModel,
-                concat=concat
+            fake_row,
+            self.fake_mapping,
+            FakeModel,
+            concat=concat
         )
 
         self.assertEqual(modified_model.address_1, u'1232/NE/Fanfare St.')

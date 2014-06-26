@@ -2,8 +2,10 @@
 :copyright: (c) 2014 Building Energy Inc
 :license: Apache v2, see LICENSE for more details.
 """
+import json
 from dateutil import parser
 from itertools import islice, chain
+
 
 def batch(iterable, size):
     """Generator to return iterators of size ``size``.
@@ -28,6 +30,3 @@ def load_ontology(filename):
     """Load json structure from a file."""
     with open(filename, 'rb') as f:
         return json.loads(f.read())
-
-
-
