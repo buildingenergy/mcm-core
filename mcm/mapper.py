@@ -4,13 +4,14 @@
 """
 import json
 
-from mcm import matchers, utils
+from mcm import matchers
 from mcm.cleaners import default_cleaner
 
 
 def build_column_mapping(
-    raw_columns, dest_columns, previous_mapping=None, map_args=None, thresh=None
-    ):
+    raw_columns, dest_columns,
+    previous_mapping=None, map_args=None, thresh=None
+):
     """Build a probabalistic mapping structure for mapping raw to dest.
 
     :param raw_columns: list of str. The column names we're trying to map.
@@ -43,7 +44,7 @@ def build_column_mapping(
 
         # Only enter this flow if we haven't already selected a result.
         if not result and result is not None:
-            best_match, conf  = matchers.best_match(
+            best_match, conf = matchers.best_match(
                 raw, dest_columns, top_n=1
             )[0]
             if conf > thresh:
@@ -190,5 +191,3 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
 
     # Noop if there aren't any concatenation configs.
     return _concatenate_columns(model, mapping, concat, cleaner)
-
-

@@ -10,3 +10,4 @@ dependencies:
 test:
     override:
         - cd mcm/tests && nosetests
+        - flake8 mcm --exclude=data

@@ -85,4 +85,3 @@ class Cleaner(object):
             return date_cleaner(value)
 
         return value
-

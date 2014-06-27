@@ -8,13 +8,12 @@ out of CSV files. Fuzzy matches, application to data models happens
 elsewhere.
 
 """
-import json
 import operator
 import sys
 
 from unicodecsv import DictReader, Sniffer
 
-from mcm import cleaners, mapper, matchers, utils
+from mcm import mapper, utils
 
 
 class CSVParser(object):
@@ -27,16 +26,16 @@ class CSVParser(object):
 
     def _get_csv_reader(self, *args, **kwargs):
         """Guess CSV dialect, and return CSV reader."""
-        #Skip the first line, as csv headers are more likely to have weird
-        #character distributions than the actual data.
+        # Skip the first line, as csv headers are more likely to have weird
+        # character distributions than the actual data.
         self.csvfile.readline()
 
-        #Read a significant chunk of the data to improve the odds of
-        #determining the dialect.  MCM is often run on very wide csv files.
+        # Read a significant chunk of the data to improve the odds of
+        # determining the dialect.  MCM is often run on very wide csv files.
         dialect = Sniffer().sniff(self.csvfile.read(16384))
         self.csvfile.seek(0)
 
-        if not 'reader_type' in kwargs:
+        if 'reader_type' not in kwargs:
             return DictReader(self.csvfile, errors='replace')
 
         else:
@@ -88,7 +87,7 @@ class MCMParser(CSVParser):
     def __init__(self, csvfile, *args, **kwargs):
         super(MCMParser, self).__init__(csvfile, args, kwargs)
         self.clean_super_scripts()
-        if not 'matching_func' in kwargs:
+        if 'matching_func' not in kwargs:
             # Special note, contains expects argumengs like the following
             # contains(a, b); tests outcome of ``b in a``
             self.matching_func = operator.contains
@@ -130,7 +129,6 @@ def main():
         parser = MCMParser(f)
         mapping = espm.MAP
         model_class = FakeModel
-        #TODO(gavin): currently saving everything as strings
         for m in parser.map_rows(mapping, model_class):
             m.save()
 
