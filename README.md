@@ -71,7 +71,7 @@ Testing
 Unfortunately, there are some directory path issues still baked in.
 To run tests you have to be in the ``tests`` directory:
 
-```bash
-    flake8 mcm --exclude=data
-    cd tests && nosetests
+```console
+$ flake8 mcm --exclude=data
+$ cd tests && nosetests
 ```
