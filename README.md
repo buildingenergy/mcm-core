@@ -1,3 +1,8 @@
+![CircleCI Status][]
+
+[CircleCI Status]: https://circleci.com/gh/buildingenergy/mcm-core.png?circle-token=e0d90d702fb615d2a6ab2ce2dbaa05a173ca06a1
+
+
 mcm-core
 ========
 
@@ -67,5 +72,6 @@ Unfortunately, there are some directory path issues still baked in.
 To run tests you have to be in the ``tests`` directory:
 
 ```bash
+    flake8 mcm --exclude=data
     cd tests && nosetests
 ```
