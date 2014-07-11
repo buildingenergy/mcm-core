@@ -1,6 +1,6 @@
 """
 :copyright: (c) 2014 Building Energy Inc
-:license: Apache v2, see LICENSE for more details.
+:license: see LICENSE for more details.
 
 
 The Reader module is intended to contain only code which reads data
