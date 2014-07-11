@@ -1,6 +1,6 @@
 """
 :copyright: (c) 2014 Building Energy Inc
-:license: Apache v2, see LICENSE for more details.
+:license: see LICENSE for more details.
 
 This module describes how data is mapped from our ontology to Django Models.
 The structure pulls out the read data from our espm-based MCM run
