@@ -1,8 +1,9 @@
 """
 :copyright: (c) 2014 Building Energy Inc
-:license: see LICENSE for more details.
+:license: Apache v2, see LICENSE for more details.
 """
 import dateutil
+from datetime import datetime, date
 import re
 import string
 
@@ -28,6 +29,8 @@ def float_cleaner(value, *args):
     """Try to clean value, coerce it into a float."""
     if not value:
         return None
+    if isinstance(value, float) or isinstance(value, int):
+        return float(value)
     try:
         value = PUNCT_REGEX.sub('', value)
         value = float(value)
@@ -55,6 +58,8 @@ def bool_cleaner(value, *args):
 def date_cleaner(value, *args):
     if not value:
         return None
+    if isinstance(value, datetime) or isinstance(value, date):
+        return value
     try:
         dateutil.parser.parse(value)
     except (TypeError, ValueError):
