@@ -1,6 +1,6 @@
 """
 :copyright: (c) 2014 Building Energy Inc
-:license: Apache v2, see LICENSE for more details.
+:license: see LICENSE for more details.
 
 
 The Reader module is intended to contain only code which reads data
@@ -300,7 +300,6 @@ def main():
         parser = MCMParser(f)
         mapping = espm.MAP
         model_class = FakeModel
-        # TODO(gavin): currently saving everything as strings
         for m in parser.map_rows(mapping, model_class):
             m.save()
 
