@@ -9,8 +9,11 @@ from mcm.cleaners import default_cleaner
 
 
 def build_column_mapping(
-    raw_columns, dest_columns,
-    previous_mapping=None, map_args=None, thresh=None
+    raw_columns,
+    dest_columns,
+    previous_mapping=None,
+    map_args=None,
+    thresh=None
 ):
     """Build a probabalistic mapping structure for mapping raw to dest.
 
@@ -187,7 +190,7 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
                 concat_column['concat_values'][item] = value
                 continue
 
-        model = apply_column_value(item, value,  model, mapping, cleaner)
+        model = apply_column_value(item, value, model, mapping, cleaner)
 
     # Noop if there aren't any concatenation configs.
     return _concatenate_columns(model, mapping, concat, cleaner)

@@ -2,6 +2,7 @@
 :copyright: (c) 2014 Building Energy Inc
 :license: see LICENSE for more details.
 """
+import datetime
 from unittest import TestCase
 
 from mcm import cleaners
@@ -37,6 +38,9 @@ class TestCleaners(TestCase):
         self.assertEqual(cleaners.float_cleaner(None), None)
         self.assertEqual(cleaners.float_cleaner(u'12,090'), 12090)
         self.assertEqual(cleaners.float_cleaner(u'12,090 ?'), 12090)
+        self.assertEqual(cleaners.float_cleaner(0.825), 0.825)
+        self.assertEqual(cleaners.float_cleaner(100), 100.0)
+        self.assertTrue(isinstance(cleaners.float_cleaner(100), float))
 
     def test_date_cleaner(self):
         """We return the value if it's convertable to a python datetime."""
@@ -44,6 +48,8 @@ class TestCleaners(TestCase):
         self.assertEqual(cleaners.date_cleaner(u''), None)
         self.assertEqual(cleaners.date_cleaner(u'some string'), None)
         self.assertEqual(cleaners.date_cleaner(u'00'), None)
+        now = datetime.datetime.now()
+        self.assertEqual(cleaners.date_cleaner(now), now)
 
     def test_clean_value(self):
         """Test that the ``Cleaner`` object properly routes cleaning."""
