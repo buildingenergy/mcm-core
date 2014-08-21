@@ -11,7 +11,7 @@ setup(
     version='.'.join(map(str, VERSION)),
     description='Map Clean Merge: Convert CSV Data into Python Objects.',
     long_description=open('README.md').read(),
-    author='Gavin McQuillan',
+    author='Gavin McQuillan, Aleck Landgraf',
     author_email='gavin.mcquillan@buildingenergy.com',
     url='https://github.com/buildingenergy/mcm-core/',
     license='Apache2',
@@ -22,7 +22,8 @@ setup(
         'fuzzywuzzy',
         'nose',
         'python-dateutil',
-        'unicodecsv'
+        'unicodecsv',
+        'xlrd>=0.9.3',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
