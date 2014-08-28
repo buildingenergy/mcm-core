@@ -17,13 +17,14 @@ setup(
     license='Apache2',
     packages=find_packages(),
     include_package_data=True,
-    package_data = { '': ['README.md'] },
+    package_data={'': ['README.md']},
     install_requires=[
         'fuzzywuzzy',
         'nose',
         'python-dateutil',
         'unicodecsv',
         'xlrd>=0.9.3',
+        'python-Levenshtein>=0.11.2',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
