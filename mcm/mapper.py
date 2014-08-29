@@ -90,7 +90,7 @@ def _concat_values(concat_columns, column_values, delimiter):
     return delimiter.join(values) or None
 
 
-def apply_column_value(item, value, model, mapping, cleaner):
+def apply_column_value(item, value, model, mapping, cleaner, apply_func=None):
     """Set the column value as the target attr on our model.
 
     :param item: str, the column name as the mapping understands it.
@@ -98,6 +98,7 @@ def apply_column_value(item, value, model, mapping, cleaner):
     :param model: inst, the object we're mapping data to.
     :param mapping: dict, the mapping of row data to attribute data.
     :param cleaner: runnable, something to clean data values.
+    :param apply: (optional), function to apply value to our model.
     :rtype: model inst
 
     """
@@ -112,7 +113,12 @@ def apply_column_value(item, value, model, mapping, cleaner):
     else:
         cleaned_value = default_cleaner(value)
     if item in mapping:
-        setattr(model, mapping.get(item), cleaned_value)
+        if apply_func and callable(apply_func):
+            # If we need to call a function to apply our value, do so.
+            # We use the 'mapped' name of the column, and the cleaned value.
+            apply_func(model, mapping.get(item), cleaned_value)
+        else:
+            setattr(model, mapping.get(item), cleaned_value)
     elif hasattr(model, 'extra_data'):
         if not isinstance(model.extra_data, dict):
             # sometimes our dict is returned as JSON string.
@@ -174,6 +180,8 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
 
     """
     initial_data = kwargs.get('initial_data', None)
+    apply_columns = kwargs.get('apply_columns', [])
+    apply_func = kwargs.get('apply_func', None)
     model = model_class()
     # If there are any initial states we need to set prior to mapping.
     if initial_data:
@@ -190,7 +198,13 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
                 concat_column['concat_values'][item] = value
                 continue
 
-        model = apply_column_value(item, value, model, mapping, cleaner)
+        # If our item is a column which requires that we apply the function
+        # then, send_apply_func will reference this function and be sent
+        # to the ``apply_column_value`` function.
+        send_apply_func = apply_func if item in apply_columns else None
+        model = apply_column_value(
+            item, value, model, mapping, cleaner, apply_func=send_apply_func
+        )
 
     # Noop if there aren't any concatenation configs.
     return _concatenate_columns(model, mapping, concat, cleaner)
