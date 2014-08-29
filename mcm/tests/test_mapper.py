@@ -141,6 +141,46 @@ class TestMapper(TestCase):
 
         self.assertDictEqual(dyn_mapping, expected)
 
+    def test_map_w_apply_func(self):
+        """Make sure that our ``apply_func`` is run against specified items."""
+        fake_model_class = FakeModel
+        fake_row = {
+            u'Property Id': u'234,235,423',
+            u'heading1': u'value1',
+            u'Space Warning': 'Something to do with space.',
+        }
+
+        def test_apply_func(model, item, value):
+            if not getattr(model, 'mapped_extra_data', None):
+                model.mapped_extra_data = {}
+            model.mapped_extra_data[item] = value
+
+        modified_model = mapper.map_row(
+            fake_row,
+            self.fake_mapping,
+            fake_model_class,
+            cleaner=self.test_cleaner,
+            apply_func=test_apply_func,
+            apply_columns=['Property Id', 'heading1']
+        )
+
+        # Assert that our function was called only on our specified column
+        # and that its value was set as expected.
+        self.assertDictEqual(
+            modified_model.mapped_extra_data,
+            {
+                u'heading_1': u'value1',        # Saved correct column name.
+                u'property_id': 234235423.0     # Also saved correct type.
+            }
+        )
+
+        # Still maintain that things which aren't mapped, even by apply_func
+        # go to the extra_data bucket.
+        self.assertDictEqual(
+            modified_model.extra_data,
+            {'Space Warning': 'Something to do with space.'}
+        )
+
     def test_map_row_dynamic_mapping_with_cleaner(self):
         """Type-based cleaners on dynamic fields based on reverse-mapping."""
         mapper.build_column_mapping(

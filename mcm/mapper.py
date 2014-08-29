@@ -115,6 +115,7 @@ def apply_column_value(item, value, model, mapping, cleaner, apply_func=None):
     if item in mapping:
         if apply_func and callable(apply_func):
             # If we need to call a function to apply our value, do so.
+            # We use the 'mapped' name of the column, and the cleaned value.
             apply_func(model, mapping.get(item), cleaned_value)
         else:
             setattr(model, mapping.get(item), cleaned_value)
