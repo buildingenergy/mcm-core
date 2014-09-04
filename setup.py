@@ -19,7 +19,7 @@ setup(
     include_package_data=True,
     package_data={'': ['README.md']},
     install_requires=[
-        'fuzzywuzzy',
+        'fuzzywuzzy>=0.3.1',
         'nose',
         'python-dateutil',
         'unicodecsv',

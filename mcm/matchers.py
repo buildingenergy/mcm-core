@@ -9,7 +9,7 @@ def best_match(s, categories, top_n=5):
     """Return the top N best matches from your categories."""
     scores = []
     for cat in categories:
-        scores.append((cat, fuzz.token_set_ratio(s.upper(), cat.upper())))
+        scores.append((cat, fuzz.ratio(s.upper(), cat.upper())))
 
     scores = sorted(scores, key=lambda x: x[1])
     return scores[-top_n:]
