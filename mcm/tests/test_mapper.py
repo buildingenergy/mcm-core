@@ -59,7 +59,7 @@ class TestMapper(TestCase):
             u'heading2': u'value2',
             u'heading3': u'value3',
             u'heading4': u'',
-            u'heading5': None
+            u'heading5': None,
         }
         fake_model_class = FakeModel
 
