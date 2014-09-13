@@ -29,7 +29,7 @@ MCM has two main peices, a reader and a mapper.
   * Concatenate rows together with a specified delimiter character.
   * Data which doesn't match a given schema's mapping is still saved. It's put in a dictionary called ``extra_data``.
 
-  
+
 Installing
 ----------
 
@@ -73,5 +73,5 @@ To run tests you have to be in the ``tests`` directory:
 
 ```console
 $ flake8 mcm --exclude=data
-$ cd tests && nosetests
+$ cd mcm/tests && nosetests
 ```

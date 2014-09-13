@@ -57,7 +57,9 @@ class TestMapper(TestCase):
             u'Year Ending': u'2013/03/13',
             u'heading1': u'value1',
             u'heading2': u'value2',
-            u'heading3': u'value3'
+            u'heading3': u'value3',
+            u'heading4': u'',
+            u'heading5': None,
         }
         fake_model_class = FakeModel
 
@@ -65,6 +67,7 @@ class TestMapper(TestCase):
             fake_row, self.fake_mapping, fake_model_class
         )
 
+        # empty columns should not result in entries in extra_data
         expected_extra = {u'heading3': u'value3'}
 
         self.assertEqual(getattr(modified_model, u'property_id'), u'234235423')
