@@ -37,9 +37,9 @@ class TestMapper(TestCase):
     ]
 
     expected = {
-        u'Address': [u'address_line_1', 67],
-        u'BBL': [u'tax_lot_id', 15],
-        u'Building ID': [u'tax_lot_id', 29],
+        u'Address': [u'address_line_1', 90],
+        u'BBL': [u'tax_lot_id', 47],
+        u'Building ID': [u'tax_lot_id', 52],
         u'City': [u'city', 100],
         u'Name': [u'name', 100]
     }
@@ -139,7 +139,7 @@ class TestMapper(TestCase):
         dyn_mapping = mapper.build_column_mapping(
             self.raw_columns,
             self.dest_columns,
-            thresh=28
+            thresh=48
         )
 
         self.assertDictEqual(dyn_mapping, expected)

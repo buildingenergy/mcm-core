@@ -19,12 +19,11 @@ setup(
     include_package_data=True,
     package_data={'': ['README.md']},
     install_requires=[
-        'fuzzywuzzy>=0.3.1',
         'nose',
         'python-dateutil',
         'unicodecsv',
         'xlrd>=0.9.3',
-        'python-Levenshtein>=0.11.2',
+        'jellyfish>=0.3.2',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
