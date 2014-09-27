@@ -139,7 +139,7 @@ class TestMapper(TestCase):
         dyn_mapping = mapper.build_column_mapping(
             self.raw_columns,
             self.dest_columns,
-            thresh=28
+            thresh=48
         )
 
         self.assertDictEqual(dyn_mapping, expected)
