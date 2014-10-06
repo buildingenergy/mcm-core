@@ -103,6 +103,10 @@ def apply_column_value(item, value, model, mapping, cleaner, apply_func=None):
 
     """
     column_name = item
+
+    # if item == 'random ed':
+    #     import pudb; pudb.set_trace()
+
     if cleaner:
         if item not in (cleaner.float_columns or cleaner.date_columns):
             # Try using a reverse mapping for dynamic maps;
@@ -152,13 +156,14 @@ def _concatenate_columns(model, mapping, concat, cleaner):
         # Now we concatenate them all and save to their designated target.
         for c in concat:
             mapping[c['target']] = c['target']
+            concated_vals = _concat_values(
+                c['concat_columns'],
+                c['concat_values'],
+                c['delimiter']
+            )
             model = apply_column_value(
                 c['target'],
-                _concat_values(
-                    c['concat_columns'],
-                    c['concat_values'],
-                    c['delimiter']
-                ),
+                concated_vals,
                 model,
                 mapping,
                 cleaner
@@ -207,6 +212,27 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
                 item, value, model, mapping, cleaner,
                 apply_func=send_apply_func
             )
+
+    if concat and [c['concat_values'] for c in concat]:
+        # We've skipped mapping any columns which we're going to concat.
+        # Now we concatenate them all and save to their designated target.
+        for c in concat:
+            mapping[c['target']] = c['target']
+            concated_vals = _concat_values(
+                c['concat_columns'],
+                c['concat_values'],
+                c['delimiter']
+            )
+            model = apply_column_value(
+                c['target'],
+                concated_vals,
+                model,
+                mapping,
+                cleaner,
+                apply_func=apply_func,
+            )
+
+
 
     # Noop if there aren't any concatenation configs.
     return _concatenate_columns(model, mapping, concat, cleaner)
