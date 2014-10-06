@@ -145,28 +145,6 @@ def _set_default_concat_config(concat):
     return concat
 
 
-def _concatenate_columns(model, mapping, concat, cleaner):
-    """If we have concatenation configs, concat those values into target."""
-    if concat and [c['concat_values'] for c in concat]:
-        # We've skipped mapping any columns which we're going to concat.
-        # Now we concatenate them all and save to their designated target.
-        for c in concat:
-            mapping[c['target']] = c['target']
-            model = apply_column_value(
-                c['target'],
-                _concat_values(
-                    c['concat_columns'],
-                    c['concat_values'],
-                    c['delimiter']
-                ),
-                model,
-                mapping,
-                cleaner
-            )
-
-    return model
-
-
 def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
     """Apply mapping of row data to model.
 
@@ -208,5 +186,23 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
                 apply_func=send_apply_func
             )
 
-    # Noop if there aren't any concatenation configs.
-    return _concatenate_columns(model, mapping, concat, cleaner)
+    if concat and [c['concat_values'] for c in concat]:
+        # We've skipped mapping any columns which we're going to concat.
+        # Now we concatenate them all and save to their designated target.
+        for c in concat:
+            mapping[c['target']] = c['target']
+            concated_vals = _concat_values(
+                c['concat_columns'],
+                c['concat_values'],
+                c['delimiter']
+            )
+            model = apply_column_value(
+                c['target'],
+                concated_vals,
+                model,
+                mapping,
+                cleaner,
+                apply_func=apply_func,
+            )
+
+    return model
