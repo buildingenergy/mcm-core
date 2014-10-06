@@ -103,10 +103,6 @@ def apply_column_value(item, value, model, mapping, cleaner, apply_func=None):
 
     """
     column_name = item
-
-    # if item == 'random ed':
-    #     import pudb; pudb.set_trace()
-
     if cleaner:
         if item not in (cleaner.float_columns or cleaner.date_columns):
             # Try using a reverse mapping for dynamic maps;
