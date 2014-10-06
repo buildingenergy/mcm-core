@@ -232,7 +232,5 @@ def map_row(row, mapping, model_class, cleaner=None, concat=None, **kwargs):
                 apply_func=apply_func,
             )
 
-
-
     # Noop if there aren't any concatenation configs.
     return _concatenate_columns(model, mapping, concat, cleaner)
