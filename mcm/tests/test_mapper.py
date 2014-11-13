@@ -118,7 +118,7 @@ class TestMapper(TestCase):
         expected[u'Building ID'] = [u'', 100]
 
         # Here we pretend that the callable `get_mapping` finds that the column
-        # has been saved as ''.
+        # has been saved as '' i.e ignored.
         def get_mapping(raw, *args, **kwargs):
             if raw == u'Building ID':
                 return [u'', 100]
