@@ -117,8 +117,8 @@ class TestMapper(TestCase):
         # This should be the result of our "previous_mapping" call.
         expected[u'Building ID'] = [u'', 100]
 
-        # Here we pretend that we're doing a query and returning
-        # relevant results.
+        # Here we pretend that the callable `get_mapping` finds that the column
+        # has been saved as ''.
         def get_mapping(raw, *args, **kwargs):
             if raw == u'Building ID':
                 return [u'', 100]
