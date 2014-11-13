@@ -109,6 +109,28 @@ class TestMapper(TestCase):
 
         self.assertDictEqual(dyn_mapping, expected)
 
+    def test_build_column_mapping_w_callable_and_ignored_column(self):
+        """tests that an ignored column (`['', 100]`) should not return a
+        suggetion.
+        """
+        expected = copy.deepcopy(self.expected)
+        # This should be the result of our "previous_mapping" call.
+        expected[u'Building ID'] = [u'', 100]
+
+        # Here we pretend that we're doing a query and returning
+        # relevant results.
+        def get_mapping(raw, *args, **kwargs):
+            if raw == u'Building ID':
+                return [u'', 100]
+
+        dyn_mapping = mapper.build_column_mapping(
+            self.raw_columns,
+            self.dest_columns,
+            previous_mapping=get_mapping,
+        )
+
+        self.assertDictEqual(dyn_mapping, expected)
+
     def test_build_column_mapping_w_null_saved(self):
         """We handle explicit saves of null, and return those dutifully."""
         expected = copy.deepcopy(self.expected)
