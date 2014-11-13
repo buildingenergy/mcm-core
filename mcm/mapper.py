@@ -45,8 +45,10 @@ def build_column_mapping(
             if mapping:
                 result, conf = mapping
 
-        # Only enter this flow if we haven't already selected a result.
-        if not result and result is not None:
+        # Only enter this flow if we haven't already selected a result. Ignore
+        # blank columns with conf of 100 since a conf of 100 signifies the user
+        # has saved that mapping.
+        if not result and result is not None and conf != 100:
             best_match, conf = matchers.best_match(
                 raw, dest_columns, top_n=1
             )[0]
