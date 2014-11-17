@@ -9,7 +9,10 @@ def best_match(s, categories, top_n=5):
     """Return the top N best matches from your categories."""
     scores = []
     for cat in categories:
-        scores.append((cat, jellyfish.jaro_winkler(s.upper(), cat.upper())))
+        scores.append((cat, jellyfish.jaro_winkler(
+            s.encode('ascii', 'replace').upper(),
+            cat.encode('ascii', 'replace').upper()
+        )))
 
     scores = sorted(scores, key=lambda x: x[1])
     scores = scores[-top_n:]
