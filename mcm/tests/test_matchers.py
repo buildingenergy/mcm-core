@@ -85,5 +85,7 @@ class TestMatchers(TestCase):
         matches = matchers.best_match(state, US_STATES, top_n=6)
         self.assertEqual(len(matches), 6)
         first_match = matches[0]
+        second_match = matches[1]
         self.assertEqual(first_match[0], 'illinois')
         self.assertGreater(first_match[1], 90)
+        self.assertLess(second_match[1], 90)
