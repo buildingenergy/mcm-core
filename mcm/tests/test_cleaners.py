@@ -44,7 +44,10 @@ class TestCleaners(TestCase):
 
     def test_date_cleaner(self):
         """We return the value if it's convertable to a python datetime."""
-        self.assertEqual(cleaners.date_cleaner(u'2/12/2012'), u'2/12/2012')
+        self.assertEqual(
+            cleaners.date_cleaner(u'2/12/2012'),
+            datetime.datetime(2012, 2, 12, 0, 0)
+        )
         self.assertEqual(cleaners.date_cleaner(u''), None)
         self.assertEqual(cleaners.date_cleaner(u'some string'), None)
         self.assertEqual(cleaners.date_cleaner(u'00'), None)
