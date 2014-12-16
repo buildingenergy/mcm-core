@@ -56,12 +56,13 @@ def bool_cleaner(value, *args):
 
 
 def date_cleaner(value, *args):
+    """Try to clean value, coerce it into a python datetime."""
     if not value:
         return None
     if isinstance(value, datetime) or isinstance(value, date):
         return value
     try:
-        dateutil.parser.parse(value)
+        value = dateutil.parser.parse(value)
     except (TypeError, ValueError):
         return None
 
