@@ -131,6 +131,9 @@ class ExcelParser(object):
         """gets the number of columns for the file"""
         return self.sheet.ncols
 
+    def headers(self):
+        return self.sheet.row_values(self.header_row)
+
 
 class CSVParser(object):
     """CSV (.csv) file parser for MCMParser
@@ -211,6 +214,9 @@ class CSVParser(object):
         """gets the number of columns for the file"""
         return len(self.csvreader.unicode_fieldnames)
 
+    def headers(self):
+        return self.csvreader.fieldnames
+
 
 class MCMParser(object):
     """
@@ -286,6 +292,10 @@ class MCMParser(object):
     def num_columns(self):
         """returns the number of columns of the file"""
         return self.reader.num_columns()
+
+    def headers(self):
+        """original order of spreadsheet headers"""
+        return self.reader.headers()
 
 
 def main():
