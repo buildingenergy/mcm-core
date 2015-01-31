@@ -88,7 +88,7 @@ class TestMCMParserCSV(TestCase):
         self.assertEqual(self.parser.num_columns(), 250)
 
     def test_headers(self):
-        self.maxDiff = None
+        """tests that we can get the original order of headers"""
         self.assertEqual(
             self.parser.headers()[0],
             'Property Id'
@@ -136,7 +136,6 @@ class TestMCMParserXLS(TestCase):
         self.assertEqual(self.parser.num_columns(), 250)
 
     def test_headers(self):
-        self.maxDiff = None
         self.assertEqual(
             self.parser.headers()[0],
             'Property Id'
@@ -184,7 +183,6 @@ class TestMCMParserXLSX(TestCase):
         self.assertEqual(self.parser.num_columns(), 250)
 
     def test_headers(self):
-        self.maxDiff = None
         self.assertEqual(
             self.parser.headers()[0],
             'Property Id'

@@ -132,6 +132,7 @@ class ExcelParser(object):
         return self.sheet.ncols
 
     def headers(self):
+        """original ordered list of spreadsheet headers"""
         return self.sheet.row_values(self.header_row)
 
 
@@ -215,6 +216,7 @@ class CSVParser(object):
         return len(self.csvreader.unicode_fieldnames)
 
     def headers(self):
+        """original ordered list of spreadsheet headers"""
         return self.csvreader.fieldnames
 
 
@@ -294,7 +296,7 @@ class MCMParser(object):
         return self.reader.num_columns()
 
     def headers(self):
-        """original order of spreadsheet headers"""
+        """original ordered list of spreadsheet headers"""
         return self.reader.headers()
 
 
