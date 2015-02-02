@@ -15,7 +15,7 @@ import sys
 
 from unicodecsv import DictReader, Sniffer
 import unicodedata
-from xlrd import XLRDError, open_workbook, xldate_as_tuple
+from xlrd import XLRDError, open_workbook, xldate_as_tuple, empty_cell
 
 from mcm import mapper, utils
 
@@ -47,7 +47,7 @@ class ExcelParser(object):
     def __init__(self, excel_file, *args, **kwargs):
         self.excel_file = excel_file
         self.sheet = self._get_sheet(excel_file)
-        self.header_row = kwargs.pop('header_row', 0)
+        self.header_row = self._get_header_row(self.sheet)
         self.excelreader = self.XLSDictReader(self.sheet, self.header_row)
 
     def _get_sheet(self, f, sheet_index=0):
@@ -61,6 +61,22 @@ class ExcelParser(object):
         book = open_workbook(file_contents=data, on_demand=True)
         self._workbook = book  # needed to determine datemode
         return book.sheet_by_index(sheet_index)
+
+    def _get_header_row(self, sheet):
+        """returns the best guess for the header row
+
+        :param sheet: xlrd sheet
+        :returns: index of header row
+        """
+        for row in range(sheet.nrows):
+            row_contains_empty_cells = False
+            for col in range(sheet.ncols):
+                if sheet.cell(row, col).ctype == empty_cell.ctype:
+                    row_contains_empty_cells = True
+            if not row_contains_empty_cells:
+                return row
+        # couldn't find a good row, return 0
+        return 0
 
     def get_value(self, item, **kwargs):
         """Handle different value types for XLS.

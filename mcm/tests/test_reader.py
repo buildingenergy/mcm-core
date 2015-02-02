@@ -145,6 +145,20 @@ class TestMCMParserXLS(TestCase):
             'Release Date'
         )
 
+    def test_blank_row(self):
+        self.xls_f.close()
+        self.xls_f = open('test_data/test_espm_blank_rows.xls', 'rb')
+        self.parser = reader.MCMParser(self.xls_f)
+        self.total_callbacks = 0
+        self.assertEqual(
+            self.parser.headers()[0],
+            'Property Id'
+        )
+        self.assertEqual(
+            self.parser.headers()[-1],
+            'Release Date'
+        )
+
 
 class TestMCMParserXLSX(TestCase):
     def setUp(self):
