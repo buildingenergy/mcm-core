@@ -160,7 +160,6 @@ class TestMCMParserXLS(TestCase):
         )
 
 
-
 class TestMCMParserXLSX(TestCase):
     def setUp(self):
         self.xlsx_f = open('test_data/test_espm.xlsx', 'rb')
