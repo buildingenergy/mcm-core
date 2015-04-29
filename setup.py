@@ -23,7 +23,7 @@ setup(
         'python-dateutil',
         'unicodecsv',
         'xlrd>=0.9.3',
-        'jellyfish>=0.3.2',
+        'jellyfish==0.4.0',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
