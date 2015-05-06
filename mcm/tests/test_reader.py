@@ -24,32 +24,6 @@ class TestCSVParser(TestCase):
             isinstance(self.parser.csvreader, unicodecsv.DictReader)
         )
 
-    def test_clean_super(self):
-        """Make sure we clean out unicode escaped super scripts."""
-        expected = u'Testing 2. And 2.'
-        test = u'Testing \xb2. And \ufffd.'
-        self.assertEqual(
-            self.parser._clean_super(test),
-            expected
-        )
-
-        # Test that our replace keyword works
-        new_expected = expected.replace('2', '3')
-        self.assertEqual(
-            self.parser._clean_super(test, replace=u'3'),
-            new_expected
-        )
-
-    def test_clean_super_scripts(self):
-        """Call _clean_super on all fieldnames."""
-        escape = u'\xb2'
-        # We know we have one of these escapes in our columns...
-
-        # self.parser.clean_super_scripts() is run by __init__ now
-        self.assertFalse(utils.list_has_substring(
-            escape, self.parser.csvreader.unicode_fieldnames
-        ))
-
 
 class TestMCMParserCSV(TestCase):
     def setUp(self):
@@ -205,3 +179,52 @@ class TestMCMParserXLSX(TestCase):
             self.parser.headers()[-1],
             'Release Date'
         )
+
+
+class TestMCMParserConsistency(TestCase):
+    def setUp(self):
+
+        self.csv_f = open('test_data/test_espm.csv', 'rb')
+        self.xls_f = open('test_data/test_espm.xls', 'rb')
+        self.xlsx_f = open('test_data/test_espm.xlsx', 'rb')
+
+        self.parser_csv = reader.MCMParser(self.csv_f)
+        self.parser_xls = reader.MCMParser(self.xls_f)
+        self.parser_xlsx = reader.MCMParser(self.xlsx_f)
+        self.total_callbacks = 0
+
+    def my_callback(self, rows):
+        self.total_callbacks += 1
+
+    def tearDown(self):
+        self.csv_f.close()
+        self.xls_f.close()
+        self.xlsx_f.close()
+
+    def test_header_consistency(self):
+        """ Assert that headers are equivalent regardless of file format """
+        header_sets = (
+            self.parser_csv.headers(),
+            self.parser_xls.headers(),
+            self.parser_xlsx.headers(),
+        )
+
+        self.assertEqual(
+            header_sets[0],
+            header_sets[1],
+        )
+        self.assertEqual(
+            header_sets[1],
+            header_sets[2],
+        )
+        self.assertEqual(
+            header_sets[0],
+            header_sets[2],
+        )
+
+    def test_header_unicode(self):
+        """ Assert that headers are equivalent regardless of file format """
+        headers = self.parser_csv.headers()
+
+        # assert that the superscript shows up
+        self.assertIn(u'\xb2', headers[7])

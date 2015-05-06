@@ -165,13 +165,10 @@ class CSVParser(object):
             reader.seek_to_beginning()
             # rows.next() will return the first row
     """
-    # Character escape sequences to replace
-    CLEAN_SUPER = [u'\ufffd', u'\xb2']
 
     def __init__(self, csvfile, *args, **kwargs):
         self.csvfile = csvfile
         self.csvreader = self._get_csv_reader(csvfile, **kwargs)
-        self.clean_super_scripts()
 
     def _get_csv_reader(self, *args, **kwargs):
         """Guess CSV dialect, and return CSV reader."""
@@ -191,27 +188,6 @@ class CSVParser(object):
             reader_type = kwargs.get('reader_type')
             del kwargs['reader_type']
             return reader_type(self.csvfile, dialect, **kwargs)
-
-    def _clean_super(self, col, replace=u'2'):
-        """Cleans up various superscript unicode escapes.
-
-        :param col: str, column name as read from the file.
-        :param replace: (optional) str, string to replace superscripts with.
-        :rtype: str, cleaned row name.
-
-        """
-        for item in self.CLEAN_SUPER:
-            col = col.replace(item, unicode(replace))
-
-        return col
-
-    def clean_super_scripts(self):
-        """Replaces column names with clean ones."""
-        new_fields = []
-        for col in self.csvreader.unicode_fieldnames:
-            new_fields.append(self._clean_super(col))
-
-        self.csvreader.unicode_fieldnames = new_fields
 
     def next(self):
         """Wouldn't it be nice to get iterables form csvreader?"""
@@ -233,7 +209,7 @@ class CSVParser(object):
 
     def headers(self):
         """original ordered list of spreadsheet headers"""
-        return self.csvreader.fieldnames
+        return self.csvreader.unicode_fieldnames
 
 
 class MCMParser(object):
@@ -257,6 +233,7 @@ class MCMParser(object):
             # rows.next() will return the first row
 
     """
+
     def __init__(self, import_file, *args, **kwargs):
         self.reader = self._get_reader(import_file)
         self.import_file = import_file
