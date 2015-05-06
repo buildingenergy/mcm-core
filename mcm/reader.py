@@ -210,7 +210,6 @@ class CSVParser(object):
         new_fields = []
         for col in self.csvreader.unicode_fieldnames:
             new_fields.append(self._clean_super(col))
-
         self.csvreader.unicode_fieldnames = new_fields
 
     def next(self):
@@ -233,7 +232,7 @@ class CSVParser(object):
 
     def headers(self):
         """original ordered list of spreadsheet headers"""
-        return self.csvreader.fieldnames
+        return self.csvreader.unicode_fieldnames
 
 
 class MCMParser(object):
