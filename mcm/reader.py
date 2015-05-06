@@ -235,6 +235,10 @@ class CSVParser(object):
         """original ordered list of spreadsheet headers"""
         return self.csvreader.fieldnames
 
+    def unicode_headers(self):
+        """cleaned ordered list of spreadsheet unicode headers"""
+        return self.csvreader.unicode_fieldnames
+
 
 class MCMParser(object):
     """
@@ -314,6 +318,10 @@ class MCMParser(object):
     def headers(self):
         """original ordered list of spreadsheet headers"""
         return self.reader.headers()
+
+    def unicode_headers(self):
+        """original ordered list of spreadsheet headers"""
+        return self.reader.unicode_headers()
 
 
 def main():
