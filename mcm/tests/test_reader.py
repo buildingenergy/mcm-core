@@ -7,7 +7,6 @@ from unittest import TestCase
 import unicodecsv
 
 from mcm import reader
-from mcm.tests import utils
 
 
 class TestCSVParser(TestCase):
