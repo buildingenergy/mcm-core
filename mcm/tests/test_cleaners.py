@@ -40,6 +40,9 @@ class TestCleaners(TestCase):
         self.assertEqual(cleaners.float_cleaner(u'12,090 ?'), 12090)
         self.assertEqual(cleaners.float_cleaner(0.825), 0.825)
         self.assertEqual(cleaners.float_cleaner(100), 100.0)
+        self.assertEqual(cleaners.float_cleaner(0), 0.0)
+        self.assertEqual(cleaners.float_cleaner(0.0), 0.0)
+        self.assertEqual(cleaners.float_cleaner('0'), 0.0)
         self.assertTrue(isinstance(cleaners.float_cleaner(100), float))
 
     def test_date_cleaner(self):
