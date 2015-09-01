@@ -27,7 +27,7 @@ def default_cleaner(value, *args):
 
 def float_cleaner(value, *args):
     """Try to clean value, coerce it into a float."""
-    if not value:
+    if value is None:
         return None
     if isinstance(value, float) or isinstance(value, int):
         return float(value)
