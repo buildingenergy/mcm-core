@@ -47,6 +47,13 @@ class TestCleaners(TestCase):
         self.assertEqual(cleaners.float_cleaner(Decimal('20.00')), 20.0)
         self.assertTrue(isinstance(cleaners.float_cleaner(100), float))
         self.assertIsInstance(cleaners.float_cleaner(Decimal('20.00')), float)
+        with self.assertRaises(TypeError) as error:
+            cleaners.float_cleaner(datetime.datetime.now())
+        message = error.exception.message
+        self.assertEqual(
+            message,
+            "float_cleaner cannot convert <type 'datetime.datetime'> to float"
+        )
 
     def test_date_cleaner(self):
         """We return the value if it's convertable to a python datetime."""
