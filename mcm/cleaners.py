@@ -6,6 +6,7 @@ import dateutil
 from datetime import datetime, date
 import re
 import string
+from decimal import Decimal
 
 from mcm.matchers import fuzzy_in_set
 
@@ -26,16 +27,22 @@ def default_cleaner(value, *args):
 
 
 def float_cleaner(value, *args):
-    """Try to clean value, coerce it into a float."""
-    if value is None:
-        return None
-    if isinstance(value, float) or isinstance(value, int):
-        return float(value)
-    try:
-        value = PUNCT_REGEX.sub('', value)
+    """Try to clean value, coerce it into a float.
+    Usage:
+        float_cleaner('1,123.45')       # 1123.45
+        float_cleaner('1,123.45 ?')     # 1123.45
+        float_cleaner(50)               # 50.0
+        float_cleaner(None)             # None
+        float_cleaner(Decimal('30.1'))  # 30.1
+    """
+    if isinstance(value, (float, int, Decimal)):
         value = float(value)
-    except ValueError:
-        return None
+    elif isinstance(value, basestring):
+        try:
+            value = PUNCT_REGEX.sub('', value)
+            value = float(value)
+        except ValueError:
+            value = None
 
     return value
 
