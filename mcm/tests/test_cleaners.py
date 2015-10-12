@@ -63,17 +63,17 @@ class TestCleaners(TestCase):
         )
         self.assertEqual(
             cleaners.date_cleaner('1420095481604'),
-            datetime.datetime(2015, 1, 1, 6, 58, 1, 604000)
+            datetime.datetime(2015, 1, 1, 6, 58, 1)
         )
         self.assertEqual(
             cleaners.date_cleaner('1420095481'),
-            datetime.datetime(2015, 1, 1, 6, 58, 1, 604000)
+            datetime.datetime(2015, 1, 1, 6, 58, 1)
         )
         self.assertEqual(cleaners.date_cleaner(u''), None)
         self.assertEqual(cleaners.date_cleaner(u'some string'), None)
-        self.assertEqual(cleaners.date_cleaner(u'00'), None)
         now = datetime.datetime.now()
         self.assertEqual(cleaners.date_cleaner(now), now)
+        self.assertEqual(cleaners.date_cleaner(u'00'), None)
 
     def test_clean_value(self):
         """Test that the ``Cleaner`` object properly routes cleaning."""

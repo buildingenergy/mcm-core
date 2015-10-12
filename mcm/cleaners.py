@@ -70,20 +70,29 @@ def bool_cleaner(value, *args):
 
 
 def date_cleaner(value, *args):
-    """Try to clean value, coerce it into a python datetime."""
+    """Try to clean value, coerce it into a python datetime.
+    param value: (str) value to be parsed
+    returns: datetime
+    """
     if not value:
         return None
     if isinstance(value, datetime) or isinstance(value, date):
         return value
     try:
         value = dateutil.parser.parse(value)
-    except (TypeError, ValueError):
+    except TypeError:
         return None
+    except ValueError as e:
+        if e.message == 'year is out of range':
+            value = datetime.utcfromtimestamp(int(value))
+        else:
+            return None
     except OverflowError:
         try:
-            value = datetime.utcfromtimestamp(float(value))
+            value = datetime.utcfromtimestamp(int(value))
         except ValueError:
-            value = datetime.utcfromtimestamp(float(value) / 1000.0)
+            value = int(value) / 1000
+            value = datetime.utcfromtimestamp(value)
 
     return value
 
