@@ -61,6 +61,14 @@ class TestCleaners(TestCase):
             cleaners.date_cleaner(u'2/12/2012'),
             datetime.datetime(2012, 2, 12, 0, 0)
         )
+        self.assertEqual(
+            cleaners.date_cleaner(1420095481604),
+            datetime.datetime((2015, 1, 1, 6, 58, 1, 604000))
+        )
+        self.assertEqual(
+            cleaners.date_cleaner(1420095481),
+            datetime.datetime((2015, 1, 1, 6, 58, 1, 604000))
+        )
         self.assertEqual(cleaners.date_cleaner(u''), None)
         self.assertEqual(cleaners.date_cleaner(u'some string'), None)
         self.assertEqual(cleaners.date_cleaner(u'00'), None)

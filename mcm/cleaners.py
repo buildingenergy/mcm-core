@@ -79,6 +79,11 @@ def date_cleaner(value, *args):
         value = dateutil.parser.parse(value)
     except (TypeError, ValueError):
         return None
+    except OverflowError:
+        try:
+            value = datetime.utcfromtimestamp(float(value))
+        except ValueError:
+            value = datetime.utcfromtimestamp(float(value) / 1000.0)
 
     return value
 
