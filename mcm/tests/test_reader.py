@@ -205,3 +205,28 @@ class TestMCMParserXLSX(TestCase):
             self.parser.headers()[-1],
             'Release Date'
         )
+
+    def test_missing_or_bad_date_values(self):
+        """Tests that missing or bad date valies in xlsx files are handled.
+        `bad_xlsx_date_value.xlsx` has one header row and one value row with
+        the bad column header `'Date Collected'`.
+        """
+        # arrange
+        self.xlsx_f.close()
+        self.xlsx_f = open('test_data/bad_xlsx_date_value.xlsx', 'rb')
+        self.parser = reader.MCMParser(self.xlsx_f)
+        self.total_callbacks = 0
+        # act
+        g = self.parser.next()
+        row = g.next()
+        # assert
+        self.assertEqual(
+            self.parser.headers()[0],
+            'Custom ID 1'
+        )
+        self.assertEqual(
+            self.parser.headers()[-1],
+            'Complete Energy Data'
+        )
+        # this is the bad date value cell
+        self.assertEqual(row['Date Collected'], None)
