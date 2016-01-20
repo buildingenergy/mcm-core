@@ -87,9 +87,12 @@ class ExcelParser(object):
 
         # Thx to Augusto C Men to point fast solution for XLS/XLSX dates
         if item.ctype == XL_CELL_DATE:
-            return datetime.datetime(
-                *xldate_as_tuple(item.value, self._workbook.datemode)
-            )
+            try:
+                return datetime.datetime(
+                    *xldate_as_tuple(item.value, self._workbook.datemode)
+                )
+            except ValueError:
+                return None
 
         if item.ctype == XL_CELL_NUMBER:
             if item.value % 1 == 0:  # integers
